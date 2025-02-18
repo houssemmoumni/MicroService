@@ -1,0 +1,48 @@
+package com.Megaminds.Recrutement.service;
+
+import com.Megaminds.Recrutement.entity.JobOffer;
+import com.Megaminds.Recrutement.entity.JobOfferStatus;
+import com.Megaminds.Recrutement.repository.JobOfferRepository;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class JobOfferService {
+
+    private final JobOfferRepository jobOfferRepository;
+
+    public JobOfferService(JobOfferRepository jobOfferRepository) {
+        this.jobOfferRepository = jobOfferRepository;
+    }
+
+    public JobOffer createJobOffer(JobOffer jobOffer) {
+        jobOffer.setPostedDate(LocalDate.now());
+        jobOffer.setStatus(JobOfferStatus.OPEN);
+        return jobOfferRepository.save(jobOffer);
+    }
+
+    public List<JobOffer> getAllJobOffers() {
+        return jobOfferRepository.findAll();
+    }
+
+    public Optional<JobOffer> getJobOfferById(Long id) {
+        return jobOfferRepository.findById(id);
+    }
+
+    public JobOffer updateJobOffer(Long id, JobOffer updatedJobOffer) {
+        return jobOfferRepository.findById(id).map(jobOffer -> {
+            jobOffer.setTitle(updatedJobOffer.getTitle());
+            jobOffer.setDescription(updatedJobOffer.getDescription());
+            jobOffer.setStatus(updatedJobOffer.getStatus());
+            return jobOfferRepository.save(jobOffer);
+        }).orElseThrow(() -> new RuntimeException("Job Offer not found"));
+    }
+
+    public void deleteJobOffer(Long id) {
+        jobOfferRepository.deleteById(id);
+    }
+}
+
