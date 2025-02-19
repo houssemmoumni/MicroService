@@ -23,4 +23,44 @@ public class Application {
 
     @OneToMany(mappedBy = "application")
     private List<Interview> interviews;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Candidate getCandidate() {
+        return candidate;
+    }
+
+    public void setCandidate(Candidate candidate) {
+        this.candidate = candidate;
+    }
+
+    public JobOffer getJobOffer() {
+        return jobOffer;
+    }
+
+    public void setJobOffer(JobOffer jobOffer) {
+        this.jobOffer = jobOffer;
+    }
+
+    public ApplicationStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ApplicationStatus status) {
+        this.status = status;
+    }
+
+    public List<Interview> getInterviews() {
+        return interviews;
+    }
+
+    public void setInterviews(List<Interview> interviews) {
+        this.interviews = interviews;
+    }
 }
