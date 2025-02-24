@@ -1,5 +1,5 @@
 package com.Megaminds.Recrutement.entity;
 
 public enum UserRole {
-    ADMIN, RECRUITER,techniciens, ouvriers,
+    ADMIN, recruiter,techniciens, ouvriers,
 }

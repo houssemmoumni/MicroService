@@ -1,7 +1,10 @@
 package com.Megaminds.Recrutement.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
-
 import java.util.List;
 
 @Entity
@@ -10,18 +13,20 @@ public class Application {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "candidate_id")
     private Candidate candidate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
+
     @JoinColumn(name = "job_offer_id")
     private JobOffer jobOffer;
 
     @Enumerated(EnumType.STRING)
     private ApplicationStatus status;
 
-    @OneToMany(mappedBy = "application")
+    @OneToMany(mappedBy = "application", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Interview> interviews;
 
     public Long getId() {

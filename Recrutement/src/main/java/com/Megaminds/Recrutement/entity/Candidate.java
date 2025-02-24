@@ -1,11 +1,14 @@
 package com.Megaminds.Recrutement.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.util.List;
 
 @Entity
-
 public class Candidate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,6 +22,7 @@ public class Candidate {
     private byte[] resume; // Store the resume as a binary file
 
     @OneToMany(mappedBy = "candidate")
+    @JsonIgnore
     private List<Application> applications;
 
     public Long getId() {

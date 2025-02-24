@@ -1,5 +1,9 @@
 package com.Megaminds.Recrutement.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -39,7 +43,8 @@ public class JobOffer {
     @JoinColumn(name = "recruiter_id")
     private User recruiter;
 
-    @OneToMany(mappedBy = "jobOffer")
+    @OneToMany(mappedBy = "jobOffer", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Application> applications;
 
     // Getter and Setter for postedDate
@@ -58,5 +63,29 @@ public class JobOffer {
 
     public void setStatus(JobOfferStatus status) {
         this.status = status;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public User getRecruiter() {
+        return recruiter;
+    }
+
+    public void setRecruiter(User recruiter) {
+        this.recruiter = recruiter;
+    }
+
+    public List<Application> getApplications() {
+        return applications;
+    }
+
+    public void setApplications(List<Application> applications) {
+        this.applications = applications;
     }
 }

@@ -1,5 +1,6 @@
 package com.Megaminds.Recrutement.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ public class Interview {
 
     @ManyToOne
     @JoinColumn(name = "application_id")
+    @JsonIgnore
     private Application application;
 
     public Long getId() {

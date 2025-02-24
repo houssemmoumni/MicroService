@@ -18,20 +18,20 @@ public class ApplicationController {
         this.applicationService = applicationService;
     }
 
-    //Candidate applies for a job
+    // Candidate applies for a job
     @PostMapping
     public ResponseEntity<Application> applyForJob(@RequestBody Application application) {
         Application newApplication = applicationService.applyForJob(application);
         return ResponseEntity.status(HttpStatus.CREATED).body(newApplication);
     }
 
-    //Get all applications
+    // Get all applications
     @GetMapping
     public ResponseEntity<List<Application>> getAllApplications() {
         return ResponseEntity.ok(applicationService.getAllApplications());
     }
 
-    //Get application by ID
+    // Get application by ID
     @GetMapping("/{id}")
     public ResponseEntity<Application> getApplicationById(@PathVariable Long id) {
         return applicationService.getApplicationById(id)
@@ -39,7 +39,7 @@ public class ApplicationController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    //Update application status (ACCEPTED / REJECTED)
+    // Update application status (ACCEPTED / REJECTED)
     @PutMapping("/{id}/status")
     public ResponseEntity<Application> updateApplicationStatus(
             @PathVariable Long id, @RequestParam String status) {
@@ -47,7 +47,7 @@ public class ApplicationController {
         return ResponseEntity.ok(updatedApplication);
     }
 
-    //Delete an application
+    // Delete an application
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteApplication(@PathVariable Long id) {
         applicationService.deleteApplication(id);
