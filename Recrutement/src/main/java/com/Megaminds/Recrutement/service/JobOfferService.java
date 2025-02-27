@@ -20,9 +20,15 @@ public class JobOfferService {
 
     public JobOffer createJobOffer(JobOffer jobOffer) {
         jobOffer.setPostedDate(LocalDate.now());
-        jobOffer.setStatus(JobOfferStatus.OPEN);
+
+        // Vérifie si un statut est déjà défini, sinon assigne OPEN par défaut
+        if (jobOffer.getStatus() == null) {
+            jobOffer.setStatus(JobOfferStatus.OPEN);
+        }
+
         return jobOfferRepository.save(jobOffer);
     }
+
 
     public List<JobOffer> getAllJobOffers() {
         return jobOfferRepository.findAll();
@@ -44,5 +50,32 @@ public class JobOfferService {
     public void deleteJobOffer(Long id) {
         jobOfferRepository.deleteById(id);
     }
+    public JobOffer publishJobOffer(Long id) {
+        return jobOfferRepository.findById(id).map(jobOffer -> {
+            // Met à jour les champs nécessaires
+            jobOffer.setPublish(true);
+            jobOffer.setStatus(JobOfferStatus.PUBLISHED);
+
+            // Assure que le titre et la date de publication sont bien présents
+            if (jobOffer.getTitle() == null || jobOffer.getTitle().isEmpty()) {
+                jobOffer.setTitle("Titre par défaut"); // Remplacez par une valeur par défaut appropriée
+            }
+            if (jobOffer.getPostedDate() == null) {
+                jobOffer.setPostedDate(LocalDate.now()); // Définit la date de publication actuelle
+            }
+
+            return jobOfferRepository.save(jobOffer);
+        }).orElseThrow(() -> new RuntimeException("Job Offer not found"));
+    }
+
+
+
+
+
+    public List<JobOffer> getPublishedJobOffers() {
+        return jobOfferRepository.findByStatus(JobOfferStatus.PUBLISHED);
+    }
+
+
 }
 

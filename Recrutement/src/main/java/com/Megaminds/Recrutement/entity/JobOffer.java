@@ -1,11 +1,7 @@
 package com.Megaminds.Recrutement.entity;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -15,26 +11,13 @@ public class JobOffer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String Title;
-
-    public String getTitle() {
-        return Title;
-    }
-
-    public void setTitle(String title) {
-        Title = title;
-    }
-
-    public String getDescription() {
-        return Description;
-    }
-
-    public void setDescription(String description) {
-        Description = description;
-    }
-
-    private String Description;
+    private String title;
+    private String description;
     private LocalDate postedDate;
+
+    @Column(nullable = false)
+    private Boolean publish = Boolean.FALSE;
+
 
     @Enumerated(EnumType.STRING)
     private JobOfferStatus status;
@@ -43,11 +26,35 @@ public class JobOffer {
     @JoinColumn(name = "recruiter_id")
     private User recruiter;
 
-    @OneToMany(mappedBy = "jobOffer", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "jobOffer", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Application> applications;
 
-    // Getter and Setter for postedDate
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title; // Correction ici
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description; // Correction ici
+    }
+
     public LocalDate getPostedDate() {
         return postedDate;
     }
@@ -56,21 +63,20 @@ public class JobOffer {
         this.postedDate = postedDate;
     }
 
-    //Add Getter and Setter for status
+    public Boolean getPublish() {
+        return publish;
+    }
+
+    public void setPublish(Boolean publish) {
+        this.publish = publish;
+    }
+
     public JobOfferStatus getStatus() {
         return status;
     }
 
     public void setStatus(JobOfferStatus status) {
         this.status = status;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public User getRecruiter() {

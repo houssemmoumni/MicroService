@@ -19,7 +19,7 @@ public class Application {
 
     @ManyToOne(fetch = FetchType.EAGER)
 
-    @JoinColumn(name = "job_offer_id")
+    @JoinColumn(name = "job_offer_id" , nullable = false)
     private JobOffer jobOffer;
 
     @Enumerated(EnumType.STRING)

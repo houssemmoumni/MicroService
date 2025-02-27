@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/api/job-offers")
 public class JobOfferController {
 
@@ -45,5 +46,22 @@ public class JobOfferController {
         jobOfferService.deleteJobOffer(id);
         return ResponseEntity.noContent().build();
     }
+    @PutMapping("/{id}/publish")
+    public ResponseEntity<?> publishJobOffer(@PathVariable Long id) {
+        try {
+            JobOffer publishedOffer = jobOfferService.publishJobOffer(id);
+            return ResponseEntity.ok(publishedOffer);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/published")
+    public ResponseEntity<List<JobOffer>> getPublishedJobOffers() {
+        List<JobOffer> publishedOffers = jobOfferService.getPublishedJobOffers();
+        return ResponseEntity.ok(publishedOffers);
+    }
+
+
 }
 
