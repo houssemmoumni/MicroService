@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/api/candidates")
 public class CandidateController {
 
@@ -28,12 +29,16 @@ public class CandidateController {
             @RequestParam("firstName") String firstName,
             @RequestParam("lastName") String lastName,
             @RequestParam("email") String email,
+            @RequestParam("phoneNumber") String phoneNumber,
+            @RequestParam("address") String address,
             @RequestParam("resume") MultipartFile resumeFile) {
         try {
             Candidate candidate = new Candidate();
             candidate.setFirstName(firstName);
             candidate.setLastName(lastName);
             candidate.setEmail(email);
+            candidate.setPhoneNumber(phoneNumber);
+            candidate.setAddress(address);
             Candidate savedCandidate = candidateService.createCandidate(candidate, resumeFile);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedCandidate);
         } catch (IOException e) {

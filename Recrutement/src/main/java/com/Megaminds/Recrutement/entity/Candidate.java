@@ -1,11 +1,7 @@
 package com.Megaminds.Recrutement.entity;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
-
 import java.util.List;
 
 @Entity
@@ -17,14 +13,18 @@ public class Candidate {
     private String firstName;
     private String lastName;
     private String email;
+    private String phoneNumber;
+    private String address;
 
+    // On stocke le CV en tant que fichier binaire
     @Lob
-    private byte[] resume; // Store the resume as a binary file
+    private byte[] resume;
 
-    @OneToMany(mappedBy = "candidate")
+    @OneToMany(mappedBy = "candidate", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Application> applications;
 
+    // Getters et Setters
     public Long getId() {
         return id;
     }
@@ -55,6 +55,22 @@ public class Candidate {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public byte[] getResume() {
