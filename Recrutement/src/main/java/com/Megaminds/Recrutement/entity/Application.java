@@ -1,10 +1,8 @@
 package com.Megaminds.Recrutement.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -14,21 +12,26 @@ public class Application {
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "candidate_id")
+    @JoinColumn(name = "candidate_id", nullable = false)
     private Candidate candidate;
 
     @ManyToOne(fetch = FetchType.EAGER)
-
-    @JoinColumn(name = "job_offer_id" , nullable = false)
+    @JoinColumn(name = "job_offer_id", nullable = false)
     private JobOffer jobOffer;
 
     @Enumerated(EnumType.STRING)
     private ApplicationStatus status;
 
+    private LocalDate date = LocalDate.now();
+
+    @Lob
+    private byte[] resume;
+
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Interview> interviews;
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -59,6 +62,22 @@ public class Application {
 
     public void setStatus(ApplicationStatus status) {
         this.status = status;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public byte[] getResume() {
+        return resume;
+    }
+
+    public void setResume(byte[] resume) {
+        this.resume = resume;
     }
 
     public List<Interview> getInterviews() {
