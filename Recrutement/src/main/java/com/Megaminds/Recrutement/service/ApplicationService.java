@@ -29,6 +29,7 @@ public class ApplicationService {
         this.jobOfferRepository = jobOfferRepository;
     }
 
+    // Method to apply for a job
     public Application applyForJob(Long candidateId, Long jobOfferId, MultipartFile resumeFile) throws IOException {
         Candidate candidate = candidateRepository.findById(candidateId)
                 .orElseThrow(() -> new RuntimeException("Candidate not found"));
@@ -48,22 +49,16 @@ public class ApplicationService {
         return applicationRepository.save(application);
     }
 
+    // Method to fetch all applications
     public List<Application> getAllApplications() {
         return applicationRepository.findAll();
     }
 
-    public Optional<Application> getApplicationById(Long id) {
-        return applicationRepository.findById(id);
-    }
-
+    // Method to update the status of an application
     public Application updateApplicationStatus(Long id, String status) {
         return applicationRepository.findById(id).map(application -> {
             application.setStatus(ApplicationStatus.valueOf(status.toUpperCase()));
             return applicationRepository.save(application);
         }).orElseThrow(() -> new RuntimeException("Application not found"));
-    }
-
-    public void deleteApplication(Long id) {
-        applicationRepository.deleteById(id);
     }
 }

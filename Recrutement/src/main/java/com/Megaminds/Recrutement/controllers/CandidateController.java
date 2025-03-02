@@ -25,7 +25,8 @@ public class CandidateController {
     }
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Candidate> createCandidate(
+    public ResponseEntity<Candidate> updateCandidate(
+            @RequestParam("candidateId") Long candidateId,
             @RequestParam("firstName") String firstName,
             @RequestParam("lastName") String lastName,
             @RequestParam("email") String email,
@@ -33,14 +34,24 @@ public class CandidateController {
             @RequestParam("address") String address,
             @RequestParam("resume") MultipartFile resumeFile) {
         try {
-            Candidate candidate = new Candidate();
+            // Récupérez le candidat existant
+            Optional<Candidate> candidateOpt = candidateService.getCandidateById(candidateId);
+            if (candidateOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Mettez à jour les informations du candidat
+            Candidate candidate = candidateOpt.get();
             candidate.setFirstName(firstName);
             candidate.setLastName(lastName);
             candidate.setEmail(email);
             candidate.setPhoneNumber(phoneNumber);
             candidate.setAddress(address);
-            Candidate savedCandidate = candidateService.createCandidate(candidate, resumeFile);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedCandidate);
+            candidate.setResume(resumeFile.getBytes());
+
+            // Enregistrez les modifications
+            Candidate updatedCandidate = candidateService.createOrUpdateCandidate(candidate, resumeFile);
+            return ResponseEntity.status(HttpStatus.OK).body(updatedCandidate);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

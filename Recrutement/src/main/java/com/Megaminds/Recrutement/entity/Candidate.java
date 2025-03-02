@@ -16,7 +16,6 @@ public class Candidate {
     private String phoneNumber;
     private String address;
 
-    // On stocke le CV en tant que fichier binaire
     @Lob
     private byte[] resume;
 

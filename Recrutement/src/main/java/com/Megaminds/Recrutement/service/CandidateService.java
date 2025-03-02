@@ -18,7 +18,22 @@ public class CandidateService {
         this.candidateRepository = candidateRepository;
     }
 
-    public Candidate createCandidate(Candidate candidate, MultipartFile resumeFile) throws IOException {
+    public Candidate createOrUpdateCandidate(Candidate candidate, MultipartFile resumeFile) throws IOException {
+        if (candidate.getId() != null) {
+            // Si l'ID du candidat est présent, c'est une mise à jour
+            Optional<Candidate> existingCandidateOpt = candidateRepository.findById(candidate.getId());
+            if (existingCandidateOpt.isPresent()) {
+                Candidate existingCandidate = existingCandidateOpt.get();
+                existingCandidate.setFirstName(candidate.getFirstName());
+                existingCandidate.setLastName(candidate.getLastName());
+                existingCandidate.setEmail(candidate.getEmail());
+                existingCandidate.setPhoneNumber(candidate.getPhoneNumber());
+                existingCandidate.setAddress(candidate.getAddress());
+                existingCandidate.setResume(resumeFile.getBytes());
+                return candidateRepository.save(existingCandidate);
+            }
+        }
+        // Si l'ID du candidat est absent, c'est une création
         candidate.setResume(resumeFile.getBytes());
         return candidateRepository.save(candidate);
     }
