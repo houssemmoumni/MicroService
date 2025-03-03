@@ -1,0 +1,47 @@
+server:
+  port: 8060   # Port sur lequel l'application va démarrer
+
+spring:
+  application:
+    name: Recrutement
+  datasource:
+    url: jdbc:mysql://localhost:3306/Recrutement?useSSL=false&serverTimezone=UTC
+    username: root  # Nom d'utilisateur de la base de données
+    password:       # Mot de passe de la base de données (laissez vide si aucun mot de passe)
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update  # Met à jour le schéma de la base de données automatiquement
+    show-sql: true      # Affiche les requêtes SQL dans les logs
+    properties:
+      hibernate:
+        format_sql: true  # Formate les requêtes SQL pour une meilleure lisibilité
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: moumnihoussem5@gmail.com  # Adresse e-mail Gmail
+    password: ylbu oumd zhkd whik       # Mot de passe d'application Gmail
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  servlet:
+    multipart:
+      max-file-size: 10MB  # Taille maximale d'un fichier uploadé
+      max-request-size: 20MB  # Taille maximale de la requête
+  config:
+    import: optional:configserver:http://localhost:8888  # Configuration Spring Cloud Config
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG  # Active les logs SQL
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # Active les logs des paramètres SQL
+
+springdoc:
+  api-docs:
+    enabled: true  # Active la documentation Swagger
+  swagger-ui:
+    enabled: true  # Active l'interface Swagger UI
