@@ -7,6 +7,7 @@ import com.Megaminds.Recrutement.entity.JobOffer;
 import com.Megaminds.Recrutement.repository.ApplicationRepository;
 import com.Megaminds.Recrutement.repository.CandidateRepository;
 import com.Megaminds.Recrutement.repository.JobOfferRepository;
+import com.Megaminds.Recrutement.service.EmailService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,11 +26,16 @@ public class ApplicationController {
     private final ApplicationRepository applicationRepository;
     private final CandidateRepository candidateRepository;
     private final JobOfferRepository jobOfferRepository;
+    private final EmailService emailService; // Injecter EmailService
 
-    public ApplicationController(ApplicationRepository applicationRepository, CandidateRepository candidateRepository, JobOfferRepository jobOfferRepository) {
+    public ApplicationController(ApplicationRepository applicationRepository,
+                                 CandidateRepository candidateRepository,
+                                 JobOfferRepository jobOfferRepository,
+                                 EmailService emailService) { // Injecter EmailService
         this.applicationRepository = applicationRepository;
         this.candidateRepository = candidateRepository;
         this.jobOfferRepository = jobOfferRepository;
+        this.emailService = emailService;
     }
 
     // Endpoint for candidates to submit an application
@@ -100,9 +106,34 @@ public class ApplicationController {
             Application application = applicationOpt.get();
             application.setStatus(ApplicationStatus.valueOf(status.toUpperCase()));
             applicationRepository.save(application);
+
+            // Récupérer le candidat associé à la candidature
+            Candidate candidate = application.getCandidate();
+
+            // Envoyer un e-mail en fonction du statut
+            String subject = "Statut de votre candidature";
+            String text;
+            if (status.equalsIgnoreCase("ACCEPTED")) {
+                text = "Félicitations ! Votre candidature pour l'offre d'emploi '" + application.getJobOffer().getTitle() + "' a été acceptée.";
+            } else if (status.equalsIgnoreCase("REJECTED")) {
+                text = "Nous regrettons de vous informer que votre candidature pour l'offre d'emploi '" + application.getJobOffer().getTitle() + "' a été rejetée.";
+            } else {
+                text = "Le statut de votre candidature pour l'offre d'emploi '" + application.getJobOffer().getTitle() + "' a été mis à jour.";
+            }
+
+            // Envoyer l'e-mail au candidat
+            emailService.sendEmail(candidate.getEmail(), subject, text);
+
             return ResponseEntity.ok(Collections.singletonMap("message", "Statut mis à jour avec succès !"));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Erreur lors de la mise à jour du statut.");
         }
     }
+    // Endpoint pour récupérer les candidatures d'un candidat
+    @GetMapping("/candidate/{candidateId}")
+    public ResponseEntity<List<Application>> getApplicationsByCandidate(@PathVariable Long candidateId) {
+        List<Application> applications = applicationRepository.findByCandidateId(candidateId);
+        return ResponseEntity.ok(applications);
+    }
+
 }
