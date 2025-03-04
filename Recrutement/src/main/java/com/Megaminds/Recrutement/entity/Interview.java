@@ -2,7 +2,6 @@ package com.Megaminds.Recrutement.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
 
 @Entity
@@ -19,6 +18,7 @@ public class Interview {
     @JsonIgnore
     private Application application;
 
+    // Getters et Setters
     public Long getId() {
         return id;
     }
@@ -51,4 +51,3 @@ public class Interview {
         this.application = application;
     }
 }
-

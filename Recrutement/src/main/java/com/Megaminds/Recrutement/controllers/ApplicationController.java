@@ -1,12 +1,7 @@
 package com.Megaminds.Recrutement.controllers;
 
-import com.Megaminds.Recrutement.entity.Application;
-import com.Megaminds.Recrutement.entity.ApplicationStatus;
-import com.Megaminds.Recrutement.entity.Candidate;
-import com.Megaminds.Recrutement.entity.JobOffer;
-import com.Megaminds.Recrutement.repository.ApplicationRepository;
-import com.Megaminds.Recrutement.repository.CandidateRepository;
-import com.Megaminds.Recrutement.repository.JobOfferRepository;
+import com.Megaminds.Recrutement.entity.*;
+import com.Megaminds.Recrutement.repository.*;
 import com.Megaminds.Recrutement.service.EmailService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,10 +33,9 @@ public class ApplicationController {
         this.emailService = emailService;
     }
 
-    // Endpoint for candidates to submit an application
     @PostMapping(produces = "application/json")
     public ResponseEntity<?> createApplication(
-            @RequestParam("candidateId") Long candidateId,
+            @RequestParam(value = "candidateId", required = false) Long candidateId,
             @RequestParam("jobOfferId") Long jobOfferId,
             @RequestParam("firstName") String firstName,
             @RequestParam("lastName") String lastName,
@@ -50,24 +44,35 @@ public class ApplicationController {
             @RequestParam("address") String address,
             @RequestParam("resumeFile") MultipartFile resumeFile) {
 
-        Optional<Candidate> candidateOpt = candidateRepository.findById(candidateId);
         Optional<JobOffer> jobOfferOpt = jobOfferRepository.findById(jobOfferId);
 
-        if (candidateOpt.isEmpty() || jobOfferOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Candidat ou offre d'emploi introuvable.");
+        if (jobOfferOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Offre d'emploi introuvable.");
         }
 
         try {
-            // Update candidate information
-            Candidate candidate = candidateOpt.get();
-            candidate.setFirstName(firstName);
-            candidate.setLastName(lastName);
-            candidate.setEmail(email);
-            candidate.setPhoneNumber(phoneNumber);
-            candidate.setAddress(address);
+            Candidate candidate;
+            if (candidateId != null) {
+                // Mettre à jour les informations du candidat existant
+                candidate = candidateRepository.findById(candidateId)
+                        .orElseThrow(() -> new RuntimeException("Candidat introuvable"));
+                candidate.setFirstName(firstName);
+                candidate.setLastName(lastName);
+                candidate.setEmail(email);
+                candidate.setPhoneNumber(phoneNumber);
+                candidate.setAddress(address);
+            } else {
+                // Créer un nouveau candidat
+                candidate = new Candidate();
+                candidate.setFirstName(firstName);
+                candidate.setLastName(lastName);
+                candidate.setEmail(email);
+                candidate.setPhoneNumber(phoneNumber);
+                candidate.setAddress(address);
+            }
             candidateRepository.save(candidate);
 
-            // Create a new application
+            // Créer une nouvelle candidature
             Application application = new Application();
             application.setCandidate(candidate);
             application.setJobOffer(jobOfferOpt.get());
@@ -83,14 +88,12 @@ public class ApplicationController {
         }
     }
 
-    // Endpoint for admin to fetch all applications
     @GetMapping
     public ResponseEntity<List<Application>> getAllApplications() {
         List<Application> applications = applicationRepository.findAll();
         return ResponseEntity.ok(applications);
     }
 
-    // Endpoint to update the status of an application
     @PutMapping("/{id}/status")
     public ResponseEntity<?> updateApplicationStatus(
             @PathVariable Long id,
@@ -129,11 +132,4 @@ public class ApplicationController {
             return ResponseEntity.internalServerError().body("Erreur lors de la mise à jour du statut.");
         }
     }
-    // Endpoint pour récupérer les candidatures d'un candidat
-    @GetMapping("/candidate/{candidateId}")
-    public ResponseEntity<List<Application>> getApplicationsByCandidate(@PathVariable Long candidateId) {
-        List<Application> applications = applicationRepository.findByCandidateId(candidateId);
-        return ResponseEntity.ok(applications);
-    }
-
 }
