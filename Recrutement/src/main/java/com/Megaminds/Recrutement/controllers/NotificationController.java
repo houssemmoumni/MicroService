@@ -1,4 +1,3 @@
-
 package com.Megaminds.Recrutement.controllers;
 
 import com.Megaminds.Recrutement.dto.NotificationDTO;

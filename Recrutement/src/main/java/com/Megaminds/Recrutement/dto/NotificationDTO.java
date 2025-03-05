@@ -1,8 +1,9 @@
 package com.Megaminds.Recrutement.dto;
+
 public class NotificationDTO {
     private String type;
     private String message;
-    private Long interviewId; // ID dynamique de l'entretien
+    private Long applicationId; // ID de l'application associée
     private boolean read;
 
     // Getters et Setters
@@ -22,12 +23,12 @@ public class NotificationDTO {
         this.message = message;
     }
 
-    public Long getInterviewId() {
-        return interviewId;
+    public Long getApplicationId() {
+        return applicationId;
     }
 
-    public void setInterviewId(Long interviewId) {
-        this.interviewId = interviewId;
+    public void setApplicationId(Long applicationId) {
+        this.applicationId = applicationId;
     }
 
     public boolean isRead() {

@@ -3,6 +3,7 @@ package com.Megaminds.Recrutement.controllers;
 import com.Megaminds.Recrutement.entity.*;
 import com.Megaminds.Recrutement.repository.*;
 import com.Megaminds.Recrutement.service.EmailService;
+import com.Megaminds.Recrutement.service.NotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,16 +22,19 @@ public class ApplicationController {
     private final ApplicationRepository applicationRepository;
     private final CandidateRepository candidateRepository;
     private final JobOfferRepository jobOfferRepository;
-    private final EmailService emailService; // Injecter EmailService
+    private final EmailService emailService;
+    private final NotificationService notificationService;
 
     public ApplicationController(ApplicationRepository applicationRepository,
                                  CandidateRepository candidateRepository,
                                  JobOfferRepository jobOfferRepository,
-                                 EmailService emailService) { // Injecter EmailService
+                                 EmailService emailService,
+                                 NotificationService notificationService) {
         this.applicationRepository = applicationRepository;
         this.candidateRepository = candidateRepository;
         this.jobOfferRepository = jobOfferRepository;
         this.emailService = emailService;
+        this.notificationService = notificationService;
     }
 
     @PostMapping(produces = "application/json")
@@ -53,7 +57,6 @@ public class ApplicationController {
         try {
             Candidate candidate;
             if (candidateId != null) {
-                // Mettre à jour les informations du candidat existant
                 candidate = candidateRepository.findById(candidateId)
                         .orElseThrow(() -> new RuntimeException("Candidat introuvable"));
                 candidate.setFirstName(firstName);
@@ -62,7 +65,6 @@ public class ApplicationController {
                 candidate.setPhoneNumber(phoneNumber);
                 candidate.setAddress(address);
             } else {
-                // Créer un nouveau candidat
                 candidate = new Candidate();
                 candidate.setFirstName(firstName);
                 candidate.setLastName(lastName);
@@ -72,7 +74,6 @@ public class ApplicationController {
             }
             candidateRepository.save(candidate);
 
-            // Créer une nouvelle candidature
             Application application = new Application();
             application.setCandidate(candidate);
             application.setJobOffer(jobOfferOpt.get());
@@ -110,14 +111,19 @@ public class ApplicationController {
             application.setStatus(ApplicationStatus.valueOf(status.toUpperCase()));
             applicationRepository.save(application);
 
-            // Récupérer le candidat associé à la candidature
             Candidate candidate = application.getCandidate();
 
-            // Envoyer un e-mail en fonction du statut
             String subject = "Statut de votre candidature";
             String text;
             if (status.equalsIgnoreCase("ACCEPTED")) {
                 text = "Félicitations ! Votre candidature pour l'offre d'emploi '" + application.getJobOffer().getTitle() + "' a été acceptée.";
+
+                // Créer une notification pour l'admin
+                notificationService.createNotification(
+                        "success", // Type de notification
+                        "La candidature de " + candidate.getFirstName() + " " + candidate.getLastName() + " a été acceptée.", // Message
+                        application.getId() // ID de la candidature
+                );
             } else if (status.equalsIgnoreCase("REJECTED")) {
                 text = "Nous regrettons de vous informer que votre candidature pour l'offre d'emploi '" + application.getJobOffer().getTitle() + "' a été rejetée.";
             } else {
@@ -129,6 +135,8 @@ public class ApplicationController {
 
             return ResponseEntity.ok(Collections.singletonMap("message", "Statut mis à jour avec succès !"));
         } catch (Exception e) {
+            System.err.println("Erreur lors de la mise à jour du statut : " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Erreur lors de la mise à jour du statut.");
         }
     }

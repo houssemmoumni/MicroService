@@ -1,6 +1,5 @@
 package com.Megaminds.Recrutement.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -10,12 +9,11 @@ public class Interview {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate interviewDate;
     private String feedback;
+    private LocalDate interviewDate;
 
     @ManyToOne
     @JoinColumn(name = "application_id")
-    @JsonIgnore
     private Application application;
 
     // Getters et Setters
@@ -27,20 +25,20 @@ public class Interview {
         this.id = id;
     }
 
-    public LocalDate getInterviewDate() {
-        return interviewDate;
-    }
-
-    public void setInterviewDate(LocalDate interviewDate) {
-        this.interviewDate = interviewDate;
-    }
-
     public String getFeedback() {
         return feedback;
     }
 
     public void setFeedback(String feedback) {
         this.feedback = feedback;
+    }
+
+    public LocalDate getInterviewDate() {
+        return interviewDate;
+    }
+
+    public void setInterviewDate(LocalDate interviewDate) {
+        this.interviewDate = interviewDate;
     }
 
     public Application getApplication() {

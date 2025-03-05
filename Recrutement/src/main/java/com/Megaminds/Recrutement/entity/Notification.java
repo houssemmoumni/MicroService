@@ -9,17 +9,16 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String type; // Type de notification (ex: "success", "error")
+    private String type; // Type de notification (ex: "success", "info", "warning")
     private String message; // Message de la notification
 
-    @Column(name = "is_read") // Renommez la colonne en "is_read"
-    private boolean read; // Indique si la notification a été lue
-
-    @ManyToOne
-    @JoinColumn(name = "interview_id")
-    private Interview interview; // Lien vers l'entretien associé
+    private boolean isRead; // Indique si la notification a été lue
 
     private LocalDateTime createdAt = LocalDateTime.now(); // Date de création
+
+    @ManyToOne
+    @JoinColumn(name = "application_id", nullable = false) // Relation avec Application
+    private Application application; // Lien vers la candidature associée
 
     // Getters et Setters
     public Long getId() {
@@ -46,20 +45,12 @@ public class Notification {
         this.message = message;
     }
 
-    public boolean isRead() {
-        return read;
+    public boolean isRead() { // Getter for isRead
+        return isRead;
     }
 
-    public void setRead(boolean read) {
-        this.read = read;
-    }
-
-    public Interview getInterview() {
-        return interview;
-    }
-
-    public void setInterview(Interview interview) {
-        this.interview = interview;
+    public void setRead(boolean read) { // Setter for isRead
+        isRead = read;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -68,5 +59,13 @@ public class Notification {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Application getApplication() {
+        return application;
+    }
+
+    public void setApplication(Application application) {
+        this.application = application;
     }
 }
