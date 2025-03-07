@@ -24,17 +24,20 @@ public class ApplicationController {
     private final JobOfferRepository jobOfferRepository;
     private final EmailService emailService;
     private final NotificationService notificationService;
+    private final InterviewRepository interviewRepository; // Add InterviewRepository
 
     public ApplicationController(ApplicationRepository applicationRepository,
                                  CandidateRepository candidateRepository,
                                  JobOfferRepository jobOfferRepository,
                                  EmailService emailService,
-                                 NotificationService notificationService) {
+                                 NotificationService notificationService,
+                                 InterviewRepository interviewRepository) { // Add InterviewRepository
         this.applicationRepository = applicationRepository;
         this.candidateRepository = candidateRepository;
         this.jobOfferRepository = jobOfferRepository;
         this.emailService = emailService;
         this.notificationService = notificationService;
+        this.interviewRepository = interviewRepository; // Initialize InterviewRepository
     }
 
     @PostMapping(produces = "application/json")
@@ -118,11 +121,19 @@ public class ApplicationController {
             if (status.equalsIgnoreCase("ACCEPTED")) {
                 text = "Félicitations ! Votre candidature pour l'offre d'emploi '" + application.getJobOffer().getTitle() + "' a été acceptée.";
 
-                // Créer une notification pour l'admin
+                // Create an interview for the accepted application
+                Interview interview = new Interview();
+                interview.setApplication(application);
+                interview.setInterviewDate(LocalDate.now().plusDays(7)); // Example: Interview in 7 days
+                interview.setFeedback("Veuillez préparer votre entretien.");
+                interviewRepository.save(interview); // Save the interview
+
+                // Create a notification with the interview link
                 notificationService.createNotification(
                         "success", // Type de notification
                         "La candidature de " + candidate.getFirstName() + " " + candidate.getLastName() + " a été acceptée.", // Message
-                        application.getId() // ID de la candidature
+                        application.getId(), // ID de la candidature
+                        interview.getId() // ID de l'entretien
                 );
             } else if (status.equalsIgnoreCase("REJECTED")) {
                 text = "Nous regrettons de vous informer que votre candidature pour l'offre d'emploi '" + application.getJobOffer().getTitle() + "' a été rejetée.";
@@ -130,7 +141,7 @@ public class ApplicationController {
                 text = "Le statut de votre candidature pour l'offre d'emploi '" + application.getJobOffer().getTitle() + "' a été mis à jour.";
             }
 
-            // Envoyer l'e-mail au candidat
+            // Send email to the candidate
             emailService.sendEmail(candidate.getEmail(), subject, text);
 
             return ResponseEntity.ok(Collections.singletonMap("message", "Statut mis à jour avec succès !"));

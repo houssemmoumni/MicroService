@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/api/job-offers")
@@ -38,7 +39,8 @@ public class JobOfferController {
 
     @PutMapping("/{id}")
     public ResponseEntity<JobOffer> updateJobOffer(@PathVariable Long id, @RequestBody JobOffer updatedJobOffer) {
-        return ResponseEntity.ok(jobOfferService.updateJobOffer(id, updatedJobOffer));
+        JobOffer jobOffer = jobOfferService.updateJobOffer(id, updatedJobOffer); // Utilisation du service pour mettre à jour
+        return ResponseEntity.ok(jobOffer);
     }
 
     @DeleteMapping("/{id}")
@@ -46,22 +48,10 @@ public class JobOfferController {
         jobOfferService.deleteJobOffer(id);
         return ResponseEntity.noContent().build();
     }
-    @PutMapping("/{id}/publish")
-    public ResponseEntity<?> publishJobOffer(@PathVariable Long id) {
-        try {
-            JobOffer publishedOffer = jobOfferService.publishJobOffer(id);
-            return ResponseEntity.ok(publishedOffer);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
-    }
 
     @GetMapping("/published")
     public ResponseEntity<List<JobOffer>> getPublishedJobOffers() {
         List<JobOffer> publishedOffers = jobOfferService.getPublishedJobOffers();
         return ResponseEntity.ok(publishedOffers);
     }
-
-
 }
-

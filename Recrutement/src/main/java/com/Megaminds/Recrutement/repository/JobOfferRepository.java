@@ -9,13 +9,7 @@ import java.util.List;
 
 @Repository
 public interface JobOfferRepository extends JpaRepository<JobOffer, Long> {
-    List<JobOffer> findByStatus(JobOfferStatus status);
+    List<JobOffer> findByStatus(JobOfferStatus status); // Find by status (OPEN, CLOSED, etc.)
 
-    List<JobOffer> findByPublishTrue();
-
-
-
-
-
+    List<JobOffer> findByPublishTrue(); // Find published job offers (published == true)
 }
-

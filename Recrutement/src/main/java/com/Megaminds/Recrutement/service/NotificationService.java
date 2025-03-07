@@ -1,9 +1,9 @@
 package com.Megaminds.Recrutement.service;
 
 import com.Megaminds.Recrutement.dto.NotificationDTO;
-import com.Megaminds.Recrutement.entity.Application;
-import com.Megaminds.Recrutement.entity.Notification;
+import com.Megaminds.Recrutement.entity.*;
 import com.Megaminds.Recrutement.repository.ApplicationRepository;
+import com.Megaminds.Recrutement.repository.InterviewRepository;
 import com.Megaminds.Recrutement.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,16 +15,20 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final ApplicationRepository applicationRepository; // Ajout du repository Application
+    private final ApplicationRepository applicationRepository; // Add ApplicationRepository
+    private final InterviewRepository interviewRepository; // Add InterviewRepository
 
-    public NotificationService(NotificationRepository notificationRepository, ApplicationRepository applicationRepository) {
+    public NotificationService(NotificationRepository notificationRepository,
+                               ApplicationRepository applicationRepository,
+                               InterviewRepository interviewRepository) {
         this.notificationRepository = notificationRepository;
         this.applicationRepository = applicationRepository;
+        this.interviewRepository = interviewRepository;
     }
 
     // Récupère toutes les notifications non lues
     public List<NotificationDTO> getNotifications() {
-        List<Notification> notifications = notificationRepository.findByIsReadFalse();
+        List<Notification> notifications = notificationRepository.findByIsReadFalse(); // Fetch unread notifications
         return notifications.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -39,6 +43,9 @@ public class NotificationService {
         if (notification.getApplication() != null) {
             dto.setApplicationId(notification.getApplication().getId()); // Lien vers l'application
         }
+        if (notification.getInterview() != null) {
+            dto.setInterviewId(notification.getInterview().getId()); // Lien vers l'entretien
+        }
         return dto;
     }
 
@@ -51,7 +58,7 @@ public class NotificationService {
     }
 
     // Crée une nouvelle notification
-    public void createNotification(String type, String message, Long applicationId) {
+    public void createNotification(String type, String message, Long applicationId, Long interviewId) {
         try {
             // Récupérer l'application associée
             Application application = applicationRepository.findById(applicationId)
@@ -64,6 +71,13 @@ public class NotificationService {
             notification.setRead(false); // Par défaut, la notification n'est pas lue
             notification.setCreatedAt(LocalDateTime.now()); // Date de création
             notification.setApplication(application); // Lier la notification à l'application
+
+            // Lier l'entretien si fourni
+            if (interviewId != null) {
+                Interview interview = interviewRepository.findById(interviewId)
+                        .orElseThrow(() -> new RuntimeException("Interview not found"));
+                notification.setInterview(interview);
+            }
 
             // Sauvegarder la notification
             notificationRepository.save(notification);

@@ -4,6 +4,7 @@ public class NotificationDTO {
     private String type;
     private String message;
     private Long applicationId; // ID de l'application associée
+    private Long interviewId; // ID de l'entretien associé
     private boolean read;
 
     // Getters et Setters
@@ -29,6 +30,14 @@ public class NotificationDTO {
 
     public void setApplicationId(Long applicationId) {
         this.applicationId = applicationId;
+    }
+
+    public Long getInterviewId() {
+        return interviewId;
+    }
+
+    public void setInterviewId(Long interviewId) {
+        this.interviewId = interviewId;
     }
 
     public boolean isRead() {

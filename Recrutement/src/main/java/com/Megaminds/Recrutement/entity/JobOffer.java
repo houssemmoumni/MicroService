@@ -18,9 +18,8 @@ public class JobOffer {
     @Column(nullable = false)
     private Boolean publish = Boolean.FALSE;
 
-
     @Enumerated(EnumType.STRING)
-    private JobOfferStatus status;
+    private JobOfferStatus status = JobOfferStatus.OPEN; // Default to OPEN
 
     @ManyToOne
     @JoinColumn(name = "recruiter_id")
@@ -44,7 +43,7 @@ public class JobOffer {
     }
 
     public void setTitle(String title) {
-        this.title = title; // Correction ici
+        this.title = title;
     }
 
     public String getDescription() {
@@ -52,7 +51,7 @@ public class JobOffer {
     }
 
     public void setDescription(String description) {
-        this.description = description; // Correction ici
+        this.description = description;
     }
 
     public LocalDate getPostedDate() {

@@ -34,9 +34,16 @@ public class InterviewController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Interview> getInterviewById(@PathVariable Long id) {
-        return interviewService.getInterviewById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        System.out.println("🔎 Recherche de l'entretien avec ID : " + id);
+        Optional<Interview> interview = interviewService.getInterviewById(id);
+
+        if (interview.isPresent()) {
+            System.out.println("✅ Entretien trouvé : " + interview.get());
+            return ResponseEntity.ok(interview.get());
+        } else {
+            System.out.println("❌ Aucun entretien trouvé pour ID : " + id);
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PutMapping("/{id}")

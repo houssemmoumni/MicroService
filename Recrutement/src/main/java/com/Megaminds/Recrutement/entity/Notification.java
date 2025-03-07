@@ -9,18 +9,20 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String type; // Type de notification (ex: "success", "info", "warning")
-    private String message; // Message de la notification
-
-    private boolean isRead; // Indique si la notification a été lue
-
-    private LocalDateTime createdAt = LocalDateTime.now(); // Date de création
+    private String type;
+    private String message;
+    private boolean isRead;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne
-    @JoinColumn(name = "application_id", nullable = false) // Relation avec Application
-    private Application application; // Lien vers la candidature associée
+    @JoinColumn(name = "application_id", nullable = false)
+    private Application application;
 
-    // Getters et Setters
+    @ManyToOne
+    @JoinColumn(name = "interview_id") // Link to the Interview entity
+    private Interview interview;
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -45,11 +47,11 @@ public class Notification {
         this.message = message;
     }
 
-    public boolean isRead() { // Getter for isRead
+    public boolean isRead() {
         return isRead;
     }
 
-    public void setRead(boolean read) { // Setter for isRead
+    public void setRead(boolean read) {
         isRead = read;
     }
 
@@ -67,5 +69,13 @@ public class Notification {
 
     public void setApplication(Application application) {
         this.application = application;
+    }
+
+    public Interview getInterview() {
+        return interview;
+    }
+
+    public void setInterview(Interview interview) {
+        this.interview = interview;
     }
 }
