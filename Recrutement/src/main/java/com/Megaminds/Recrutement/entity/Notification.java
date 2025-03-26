@@ -9,18 +9,18 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String type;
-    private String message;
-    private boolean isRead;
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private String type; // Type of notification (e.g., "success", "error")
+    private String message; // Notification message
+    private boolean isRead; // Whether the notification has been read
+    private LocalDateTime createdAt; // Timestamp of creation
 
     @ManyToOne
-    @JoinColumn(name = "application_id", nullable = false)
-    private Application application;
+    @JoinColumn(name = "application_id")
+    private Application application; // Link to the application
 
     @ManyToOne
-    @JoinColumn(name = "interview_id") // Link to the Interview entity
-    private Interview interview;
+    @JoinColumn(name = "interview_id")
+    private Interview interview; // Link to the interview (if applicable)
 
     // Getters and Setters
     public Long getId() {

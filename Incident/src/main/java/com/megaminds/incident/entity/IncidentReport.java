@@ -1,5 +1,7 @@
 package com.megaminds.incident.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
@@ -20,90 +22,49 @@ public class IncidentReport {
     private IncidentSeverity severity; // LOW, MEDIUM, HIGH
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "reported_by")
-    private User reportedBy; // L'ouvrier qui a déclaré l'incident
+    private User reportedBy;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "assigned_to")
-    private User assignedTo; // Le technicien assigné par l'admin
+    private User assignedTo;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "project_id")
-    private Project project; // Le projet dans lequel l'incident est déclaré
+    private Project project;
 
-    @OneToMany(mappedBy = "incidentReport", cascade = CascadeType.ALL)
-    private List<IncidentAction> actions; // Actions effectuées sur cet incident
+    @OneToMany(mappedBy = "incidentReport", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @JsonManagedReference // Évite la boucle infinie dans la réponse JSON
+    private List<IncidentAction> actions;
 
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getId() {
-        return id;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public LocalDate getReportDate() { return reportDate; }
+    public void setReportDate(LocalDate reportDate) { this.reportDate = reportDate; }
 
-    public String getDescription() {
-        return description;
-    }
+    public IncidentStatus getStatus() { return status; }
+    public void setStatus(IncidentStatus status) { this.status = status; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public IncidentSeverity getSeverity() { return severity; }
+    public void setSeverity(IncidentSeverity severity) { this.severity = severity; }
 
-    public LocalDate getReportDate() {
-        return reportDate;
-    }
+    public User getReportedBy() { return reportedBy; }
+    public void setReportedBy(User reportedBy) { this.reportedBy = reportedBy; }
 
-    public void setReportDate(LocalDate reportDate) {
-        this.reportDate = reportDate;
-    }
+    public User getAssignedTo() { return assignedTo; }
+    public void setAssignedTo(User assignedTo) { this.assignedTo = assignedTo; }
 
-    public IncidentStatus getStatus() {
-        return status;
-    }
+    public Project getProject() { return project; }
+    public void setProject(Project project) { this.project = project; }
 
-    public void setStatus(IncidentStatus status) {
-        this.status = status;
-    }
-
-    public IncidentSeverity getSeverity() {
-        return severity;
-    }
-
-    public void setSeverity(IncidentSeverity severity) {
-        this.severity = severity;
-    }
-
-    public User getReportedBy() {
-        return reportedBy;
-    }
-
-    public void setReportedBy(User reportedBy) {
-        this.reportedBy = reportedBy;
-    }
-
-    public User getAssignedTo() {
-        return assignedTo;
-    }
-
-    public void setAssignedTo(User assignedTo) {
-        this.assignedTo = assignedTo;
-    }
-
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
-    public List<IncidentAction> getActions() {
-        return actions;
-    }
-
-    public void setActions(List<IncidentAction> actions) {
-        this.actions = actions;
-    }
+    public List<IncidentAction> getActions() { return actions; }
+    public void setActions(List<IncidentAction> actions) { this.actions = actions; }
 }

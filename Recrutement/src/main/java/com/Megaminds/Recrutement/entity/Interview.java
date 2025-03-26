@@ -9,14 +9,13 @@ public class Interview {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String feedback;
-    private LocalDate interviewDate;
-
     @ManyToOne
     @JoinColumn(name = "application_id")
     private Application application;
 
-    // Getters et Setters
+    private LocalDate interviewDate;
+    private String feedback;
+
     public Long getId() {
         return id;
     }
@@ -25,12 +24,12 @@ public class Interview {
         this.id = id;
     }
 
-    public String getFeedback() {
-        return feedback;
+    public Application getApplication() {
+        return application;
     }
 
-    public void setFeedback(String feedback) {
-        this.feedback = feedback;
+    public void setApplication(Application application) {
+        this.application = application;
     }
 
     public LocalDate getInterviewDate() {
@@ -41,11 +40,11 @@ public class Interview {
         this.interviewDate = interviewDate;
     }
 
-    public Application getApplication() {
-        return application;
+    public String getFeedback() {
+        return feedback;
     }
 
-    public void setApplication(Application application) {
-        this.application = application;
+    public void setFeedback(String feedback) {
+        this.feedback = feedback;
     }
 }

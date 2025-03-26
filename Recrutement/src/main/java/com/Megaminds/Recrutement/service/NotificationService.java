@@ -1,10 +1,12 @@
 package com.Megaminds.Recrutement.service;
 
 import com.Megaminds.Recrutement.dto.NotificationDTO;
-import com.Megaminds.Recrutement.entity.*;
+import com.Megaminds.Recrutement.entity.Notification;
+import com.Megaminds.Recrutement.entity.Application;
+import com.Megaminds.Recrutement.entity.Interview;
+import com.Megaminds.Recrutement.repository.NotificationRepository;
 import com.Megaminds.Recrutement.repository.ApplicationRepository;
 import com.Megaminds.Recrutement.repository.InterviewRepository;
-import com.Megaminds.Recrutement.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,8 +17,8 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final ApplicationRepository applicationRepository; // Add ApplicationRepository
-    private final InterviewRepository interviewRepository; // Add InterviewRepository
+    private final ApplicationRepository applicationRepository;
+    private final InterviewRepository interviewRepository;
 
     public NotificationService(NotificationRepository notificationRepository,
                                ApplicationRepository applicationRepository,
@@ -26,30 +28,44 @@ public class NotificationService {
         this.interviewRepository = interviewRepository;
     }
 
-    // Récupère toutes les notifications non lues
+    // Create a notification for the candidate
+    public void createNotification(String type, String message, Long applicationId, Long interviewId) {
+        try {
+            // Fetch the application
+            Application application = applicationRepository.findById(applicationId)
+                    .orElseThrow(() -> new RuntimeException("Application not found"));
+
+            // Create a new notification
+            Notification notification = new Notification();
+            notification.setType(type);
+            notification.setMessage(message);
+            notification.setRead(false); // Mark as unread by default
+            notification.setCreatedAt(LocalDateTime.now()); // Set creation time
+            notification.setApplication(application); // Link to the application
+
+            // Link the interview if provided
+            if (interviewId != null) {
+                Interview interview = interviewRepository.findById(interviewId)
+                        .orElseThrow(() -> new RuntimeException("Interview not found"));
+                notification.setInterview(interview);
+            }
+
+            // Save the notification
+            notificationRepository.save(notification);
+        } catch (Exception e) {
+            System.err.println("Error creating notification: " + e.getMessage());
+            throw e; // Re-throw the exception for the controller to handle
+        }
+    }
+
+    // Fetch all notifications
     public List<NotificationDTO> getNotifications() {
-        List<Notification> notifications = notificationRepository.findByIsReadFalse(); // Fetch unread notifications
-        return notifications.stream()
+        return notificationRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    // Convertit une entité Notification en DTO
-    private NotificationDTO convertToDTO(Notification notification) {
-        NotificationDTO dto = new NotificationDTO();
-        dto.setType(notification.getType());
-        dto.setMessage(notification.getMessage());
-        dto.setRead(notification.isRead());
-        if (notification.getApplication() != null) {
-            dto.setApplicationId(notification.getApplication().getId()); // Lien vers l'application
-        }
-        if (notification.getInterview() != null) {
-            dto.setInterviewId(notification.getInterview().getId()); // Lien vers l'entretien
-        }
-        return dto;
-    }
-
-    // Marque une notification comme lue
+    // Mark a notification as read
     public void markAsRead(Long id) {
         Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notification not found"));
@@ -57,34 +73,16 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    // Crée une nouvelle notification
-    public void createNotification(String type, String message, Long applicationId, Long interviewId) {
-        try {
-            // Récupérer l'application associée
-            Application application = applicationRepository.findById(applicationId)
-                    .orElseThrow(() -> new RuntimeException("Application not found"));
-
-            // Créer une nouvelle notification
-            Notification notification = new Notification();
-            notification.setType(type);
-            notification.setMessage(message);
-            notification.setRead(false); // Par défaut, la notification n'est pas lue
-            notification.setCreatedAt(LocalDateTime.now()); // Date de création
-            notification.setApplication(application); // Lier la notification à l'application
-
-            // Lier l'entretien si fourni
-            if (interviewId != null) {
-                Interview interview = interviewRepository.findById(interviewId)
-                        .orElseThrow(() -> new RuntimeException("Interview not found"));
-                notification.setInterview(interview);
-            }
-
-            // Sauvegarder la notification
-            notificationRepository.save(notification);
-        } catch (Exception e) {
-            System.err.println("Erreur lors de la création de la notification : " + e.getMessage());
-            e.printStackTrace();
-            throw e; // Relancez l'exception pour qu'elle soit capturée dans le contrôleur
+    // Convert Notification entity to NotificationDTO
+    private NotificationDTO convertToDTO(Notification notification) {
+        NotificationDTO dto = new NotificationDTO();
+        dto.setType(notification.getType());
+        dto.setMessage(notification.getMessage());
+        dto.setApplicationId(notification.getApplication().getId());
+        if (notification.getInterview() != null) {
+            dto.setInterviewId(notification.getInterview().getId());
         }
+        dto.setRead(notification.isRead());
+        return dto;
     }
 }

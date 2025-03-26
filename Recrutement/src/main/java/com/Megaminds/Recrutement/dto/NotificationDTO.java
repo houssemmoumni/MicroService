@@ -3,11 +3,11 @@ package com.Megaminds.Recrutement.dto;
 public class NotificationDTO {
     private String type;
     private String message;
-    private Long applicationId; // ID de l'application associée
-    private Long interviewId; // ID de l'entretien associé
+    private Long applicationId;
+    private Long interviewId;
     private boolean read;
 
-    // Getters et Setters
+    // Getters and Setters
     public String getType() {
         return type;
     }

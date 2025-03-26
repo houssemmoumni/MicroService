@@ -16,10 +16,10 @@ public class JobOffer {
     private LocalDate postedDate;
 
     @Column(nullable = false)
-    private Boolean publish = Boolean.FALSE;
+    private Boolean publish = Boolean.FALSE; // Par défaut, l'offre n'est pas publiée
 
     @Enumerated(EnumType.STRING)
-    private JobOfferStatus status = JobOfferStatus.OPEN; // Default to OPEN
+    private JobOfferStatus status = JobOfferStatus.OPEN; // Statut par défaut : OPEN
 
     @ManyToOne
     @JoinColumn(name = "recruiter_id")

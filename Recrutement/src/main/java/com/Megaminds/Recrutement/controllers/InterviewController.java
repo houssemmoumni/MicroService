@@ -1,3 +1,4 @@
+
 package com.Megaminds.Recrutement.controllers;
 
 import com.Megaminds.Recrutement.entity.Interview;
@@ -11,6 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/interviews")
+@CrossOrigin(origins = "http://localhost:4200")
 public class InterviewController {
 
     private final InterviewService interviewService;

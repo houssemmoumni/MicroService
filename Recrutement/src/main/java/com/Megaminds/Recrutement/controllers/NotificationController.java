@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/api/notifications")
 public class NotificationController {
 
@@ -17,15 +18,15 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
-    // Récupère toutes les notifications non lues
+    // Fetch all notifications
     @GetMapping
     public ResponseEntity<List<NotificationDTO>> getNotifications() {
         List<NotificationDTO> notifications = notificationService.getNotifications();
         return ResponseEntity.ok(notifications);
     }
 
-    // Marque une notification comme lue
-    @PutMapping("/{id}/isread")
+    // Mark a notification as read
+    @PutMapping("/{id}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable Long id) {
         notificationService.markAsRead(id);
         return ResponseEntity.noContent().build();

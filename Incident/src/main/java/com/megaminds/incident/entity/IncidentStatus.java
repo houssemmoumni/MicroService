@@ -1,8 +1,8 @@
-package com.megaminds.incident.entity;
+    package com.megaminds.incident.entity;
 
-public enum IncidentStatus {
-    DECLARED,
-    ASSIGNED,
-    RESOLVED,
-    REOPENED
-}
+    public enum IncidentStatus {
+        DECLARED,
+        ASSIGNED,
+        RESOLVED,
+        REOPENED
+    }

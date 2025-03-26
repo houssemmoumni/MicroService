@@ -1,5 +1,6 @@
 package com.megaminds.incident.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -13,61 +14,34 @@ public class IncidentAction {
     private LocalDate actionDate;
 
     @Enumerated(EnumType.STRING)
-    private IncidentActionType actionType; // CREATED, ASSIGNED, RESOLVED, REOPENED
+    private IncidentActionType actionType;
 
     @ManyToOne
+
     @JoinColumn(name = "incident_id")
-    private IncidentReport incidentReport; // Incident lié à cette action
+    @JsonBackReference
+    private IncidentReport incidentReport;
 
     @ManyToOne
+
     @JoinColumn(name = "performed_by")
-    private User performedBy; // Le technicien ou admin qui a réalisé l'action
+    private User performedBy;
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public String getDescription() {
-        return description;
-    }
+    public LocalDate getActionDate() { return actionDate; }
+    public void setActionDate(LocalDate actionDate) { this.actionDate = actionDate; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public IncidentActionType getActionType() { return actionType; }
+    public void setActionType(IncidentActionType actionType) { this.actionType = actionType; }
 
-    public LocalDate getActionDate() {
-        return actionDate;
-    }
+    public IncidentReport getIncidentReport() { return incidentReport; }
+    public void setIncidentReport(IncidentReport incidentReport) { this.incidentReport = incidentReport; }
 
-    public void setActionDate(LocalDate actionDate) {
-        this.actionDate = actionDate;
-    }
-
-    public IncidentActionType getActionType() {
-        return actionType;
-    }
-
-    public void setActionType(IncidentActionType actionType) {
-        this.actionType = actionType;
-    }
-
-    public IncidentReport getIncidentReport() {
-        return incidentReport;
-    }
-
-    public void setIncidentReport(IncidentReport incidentReport) {
-        this.incidentReport = incidentReport;
-    }
-
-    public User getPerformedBy() {
-        return performedBy;
-    }
-
-    public void setPerformedBy(User performedBy) {
-        this.performedBy = performedBy;
-    }
+    public User getPerformedBy() { return performedBy; }
+    public void setPerformedBy(User performedBy) { this.performedBy = performedBy; }
 }

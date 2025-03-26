@@ -13,14 +13,15 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role; // OUVRIER, ADMIN, TECHNICIEN
 
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
+    // ✅ Constructeur avec ID pour éviter l'erreur
+    public User(Long id) {
         this.id = id;
     }
+
+    public User() {}
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public String getUsername() {
         return username;
@@ -46,3 +47,4 @@ public class User {
         this.role = role;
     }
 }
+

@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/incident-actions")
+@CrossOrigin(origins = "http://localhost:4200")
 public class IncidentActionController {
 
     private final IncidentActionService incidentActionService;

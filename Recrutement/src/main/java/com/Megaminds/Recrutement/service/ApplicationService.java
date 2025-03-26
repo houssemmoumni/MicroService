@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ApplicationService implements IApplicationService{
+public class ApplicationService {
 
     private final ApplicationRepository applicationRepository;
     private final CandidateRepository candidateRepository;

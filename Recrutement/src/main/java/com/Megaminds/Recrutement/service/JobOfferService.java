@@ -18,56 +18,54 @@ public class JobOfferService {
         this.jobOfferRepository = jobOfferRepository;
     }
 
+    // Crée une nouvelle offre d'emploi
     public JobOffer createJobOffer(JobOffer jobOffer) {
-        jobOffer.setPostedDate(LocalDate.now());
-
-        // Default status is OPEN if not provided
+        jobOffer.setPostedDate(LocalDate.now()); // Définit la date de publication
         if (jobOffer.getStatus() == null) {
-            jobOffer.setStatus(JobOfferStatus.OPEN);
+            jobOffer.setStatus(JobOfferStatus.OPEN); // Statut par défaut : OPEN
         }
-
         return jobOfferRepository.save(jobOffer);
     }
 
+    // Récupère toutes les offres d'emploi
     public List<JobOffer> getAllJobOffers() {
         return jobOfferRepository.findAll();
     }
 
+    // Récupère une offre d'emploi par son ID
     public Optional<JobOffer> getJobOfferById(Long id) {
         return jobOfferRepository.findById(id);
     }
 
+    // Met à jour une offre d'emploi
     public JobOffer updateJobOffer(Long id, JobOffer updatedJobOffer) {
         return jobOfferRepository.findById(id).map(jobOffer -> {
             jobOffer.setTitle(updatedJobOffer.getTitle());
             jobOffer.setDescription(updatedJobOffer.getDescription());
             jobOffer.setStatus(updatedJobOffer.getStatus());
             return jobOfferRepository.save(jobOffer);
-        }).orElseThrow(() -> new RuntimeException("Job Offer not found"));
+        }).orElseThrow(() -> new RuntimeException("Offre d'emploi non trouvée"));
     }
 
+    // Supprime une offre d'emploi
     public void deleteJobOffer(Long id) {
         jobOfferRepository.deleteById(id);
     }
 
+    // Publie une offre d'emploi
     public JobOffer publishJobOffer(Long id) {
         return jobOfferRepository.findById(id).map(jobOffer -> {
-            // Update to published status
-            jobOffer.setPublish(true);
-            jobOffer.setStatus(JobOfferStatus.PUBLISHED);
-
-            if (jobOffer.getTitle() == null || jobOffer.getTitle().isEmpty()) {
-                jobOffer.setTitle("Titre par défaut"); // Default title if not provided
-            }
+            jobOffer.setPublish(true); // Publie l'offre
+            jobOffer.setStatus(JobOfferStatus.PUBLISHED); // Met à jour le statut
             if (jobOffer.getPostedDate() == null) {
-                jobOffer.setPostedDate(LocalDate.now()); // Default posted date if not provided
+                jobOffer.setPostedDate(LocalDate.now()); // Définit la date de publication si elle n'existe pas
             }
-
             return jobOfferRepository.save(jobOffer);
-        }).orElseThrow(() -> new RuntimeException("Job Offer not found"));
+        }).orElseThrow(() -> new RuntimeException("Offre d'emploi non trouvée"));
     }
 
+    // Récupère les offres publiées
     public List<JobOffer> getPublishedJobOffers() {
-        return jobOfferRepository.findByStatus(JobOfferStatus.PUBLISHED);
+        return jobOfferRepository.findByPublishTrue();
     }
 }

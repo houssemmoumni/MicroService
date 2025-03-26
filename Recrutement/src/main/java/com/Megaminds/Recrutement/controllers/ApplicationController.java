@@ -24,20 +24,20 @@ public class ApplicationController {
     private final JobOfferRepository jobOfferRepository;
     private final EmailService emailService;
     private final NotificationService notificationService;
-    private final InterviewRepository interviewRepository; // Add InterviewRepository
+    private final InterviewRepository interviewRepository;
 
     public ApplicationController(ApplicationRepository applicationRepository,
                                  CandidateRepository candidateRepository,
                                  JobOfferRepository jobOfferRepository,
                                  EmailService emailService,
                                  NotificationService notificationService,
-                                 InterviewRepository interviewRepository) { // Add InterviewRepository
+                                 InterviewRepository interviewRepository) {
         this.applicationRepository = applicationRepository;
         this.candidateRepository = candidateRepository;
         this.jobOfferRepository = jobOfferRepository;
         this.emailService = emailService;
         this.notificationService = notificationService;
-        this.interviewRepository = interviewRepository; // Initialize InterviewRepository
+        this.interviewRepository = interviewRepository;
     }
 
     @PostMapping(produces = "application/json")
