@@ -3,83 +3,85 @@ package com.megaminds.incident.controllers;
 import com.megaminds.incident.dto.IncidentReportDTO;
 import com.megaminds.incident.entity.*;
 import com.megaminds.incident.service.IncidentReportService;
+import com.megaminds.incident.service.NotificationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/incidents")
 @CrossOrigin(origins = "http://localhost:4200")
 public class IncidentReportController {
-    private final IncidentReportService incidentReportService;
 
-    public IncidentReportController(IncidentReportService incidentReportService) {
+    private final IncidentReportService incidentReportService;
+    private final NotificationService notificationService;
+    private final SimpMessagingTemplate messagingTemplate;
+
+    public IncidentReportController(
+            IncidentReportService incidentReportService,
+            NotificationService notificationService,
+            SimpMessagingTemplate messagingTemplate
+    ) {
         this.incidentReportService = incidentReportService;
+        this.notificationService = notificationService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @PostMapping
-    public ResponseEntity<IncidentReport> createIncident(@RequestBody IncidentReportDTO incidentReportDTO) {
-        IncidentReport incidentReport = convertToEntity(incidentReportDTO);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(incidentReportService.createIncident(incidentReport));
-    }
+    public ResponseEntity<Map<String, Object>> createIncident(@RequestBody IncidentReportDTO incidentReportDTO) {
+        Map<String, Object> response = new HashMap<>();
 
-    @GetMapping
-    public ResponseEntity<List<IncidentReport>> getAllIncidents() {
-        return ResponseEntity.ok(incidentReportService.getAllIncidents());
-    }
+        try {
+            // Validation
+            if (incidentReportDTO.getProjectId() == null) {
+                response.put("error", "Project ID is required");
+                response.put("status", HttpStatus.BAD_REQUEST.value());
+                return ResponseEntity.badRequest().body(response);
+            }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<IncidentReport> getIncidentById(@PathVariable Long id) {
-        return incidentReportService.getIncidentById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+            if (incidentReportDTO.getDescription() == null || incidentReportDTO.getDescription().trim().isEmpty()) {
+                response.put("error", "Description is required");
+                response.put("status", HttpStatus.BAD_REQUEST.value());
+                return ResponseEntity.badRequest().body(response);
+            }
 
-    @GetMapping("/project/{projectId}")
-    public ResponseEntity<List<IncidentReport>> getIncidentsByProject(@PathVariable Long projectId) {
-        return ResponseEntity.ok(incidentReportService.getIncidentsByProject(projectId));
-    }
+            // Create incident entity
+            IncidentReport incidentReport = new IncidentReport();
+            incidentReport.setDescription(incidentReportDTO.getDescription());
+            incidentReport.setReportDate(incidentReportDTO.getReportDate());
+            incidentReport.setStatus(incidentReportDTO.getStatus());
+            incidentReport.setSeverity(incidentReportDTO.getSeverity());
 
-    @GetMapping("/status/{status}")
-    public ResponseEntity<List<IncidentReport>> getIncidentsByStatus(@PathVariable IncidentStatus status) {
-        return ResponseEntity.ok(incidentReportService.getIncidentsByStatus(status));
-    }
+            // Save incident
+            IncidentReport saved = incidentReportService.createIncident(
+                    incidentReport,
+                    incidentReportDTO.getReportedById(),
+                    incidentReportDTO.getProjectId()
+            );
 
-    @PatchMapping("/{incidentId}/assign/{technicianId}")
-    public ResponseEntity<IncidentReport> assignTechnician(
-            @PathVariable Long incidentId,
-            @PathVariable Long technicianId) {
-        return ResponseEntity.ok(incidentReportService.assignIncident(incidentId, technicianId));
-    }
+            // Create and send notification
+            Notification notification = new Notification();
+            notification.setMessage("New incident reported by " + incidentReportDTO.getReporterName() +
+                    ": " + incidentReportDTO.getDescription());
+            notification.setNotificationDate(LocalDateTime.now());
+            notification.setRead(false);
+            notification.setSeverity(incidentReportDTO.getSeverity().name());
 
-    @PatchMapping("/{id}/status/{status}")
-    public ResponseEntity<IncidentReport> updateStatus(
-            @PathVariable Long id,
-            @PathVariable IncidentStatus status) {
-        return incidentReportService.getIncidentById(id)
-                .map(incident -> {
-                    incident.setStatus(status);
-                    return ResponseEntity.ok(incidentReportService.createIncident(incident));
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
+            messagingTemplate.convertAndSend("/topic/notifications", notification);
 
-    private IncidentReport convertToEntity(IncidentReportDTO dto) {
-        IncidentReport incidentReport = new IncidentReport();
-        incidentReport.setDescription(dto.getDescription());
-        incidentReport.setReportDate(dto.getReportDate());
-        incidentReport.setStatus(dto.getStatus() != null ? dto.getStatus() : IncidentStatus.DECLARED);
-        incidentReport.setSeverity(dto.getSeverity() != null ? dto.getSeverity() : IncidentSeverity.MEDIUM);
+            // Return response
+            response.put("data", saved);
+            response.put("status", HttpStatus.CREATED.value());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
-        if (dto.getReportedById() != null) {
-            incidentReport.setReportedBy(new User(dto.getReportedById()));
+        } catch (Exception e) {
+            response.put("error", "Failed to create incident: " + e.getMessage());
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return ResponseEntity.internalServerError().body(response);
         }
-        if (dto.getProjectId() != null) {
-            incidentReport.setProject(new Project(dto.getProjectId()));
-        }
-
-        return incidentReport;
     }
 }

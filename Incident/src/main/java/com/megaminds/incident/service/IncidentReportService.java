@@ -2,109 +2,66 @@ package com.megaminds.incident.service;
 
 import com.megaminds.incident.entity.*;
 import com.megaminds.incident.repository.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
 
 @Service
 public class IncidentReportService {
     private final IncidentReportRepository incidentReportRepository;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
-    private final NotificationService notificationService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public IncidentReportService(IncidentReportRepository incidentReportRepository,
                                  UserRepository userRepository,
-                                 ProjectRepository projectRepository,
-                                 NotificationService notificationService) {
+                                 ProjectRepository projectRepository) {
         this.incidentReportRepository = incidentReportRepository;
         this.userRepository = userRepository;
         this.projectRepository = projectRepository;
-        this.notificationService = notificationService;
     }
 
     @Transactional
-    public IncidentReport createIncident(IncidentReport incidentReport) {
-        // Validation des entités associées
-        if (incidentReport.getReportedBy() != null) {
-            User reporter = userRepository.findById(incidentReport.getReportedBy().getId())
-                    .orElseThrow(() -> new RuntimeException("Utilisateur déclarant non trouvé"));
+    public IncidentReport createIncident(IncidentReport incidentReport, Long reportedById, Long projectId) {
+        // 1. Get and verify project exists
+        Project project = entityManager.find(Project.class, projectId);
+        if (project == null || !project.isPublished()) {
+            throw new IllegalArgumentException("Published project with ID " + projectId + " not found");
+        }
+
+        // 2. Get and verify user exists if provided
+        User reporter = null;
+        if (reportedById != null) {
+            reporter = entityManager.find(User.class, reportedById);
+            if (reporter == null) {
+                throw new IllegalArgumentException("User with ID " + reportedById + " not found");
+            }
+        }
+
+        // 3. Set the managed entities
+        incidentReport.setProject(project);
+        if (reporter != null) {
             incidentReport.setReportedBy(reporter);
         }
 
-        if (incidentReport.getProject() != null) {
-            Project project = projectRepository.findById(incidentReport.getProject().getId())
-                    .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
-            incidentReport.setProject(project);
+        // 4. Set defaults
+        if (incidentReport.getStatus() == null) {
+            incidentReport.setStatus(IncidentStatus.DECLARED);
+        }
+        if (incidentReport.getSeverity() == null) {
+            incidentReport.setSeverity(IncidentSeverity.MEDIUM);
+        }
+        if (incidentReport.getReportDate() == null) {
+            incidentReport.setReportDate(LocalDate.now());
         }
 
-        // Par défaut, le statut est DECLARED
-        incidentReport.setStatus(IncidentStatus.DECLARED);
-
-        IncidentReport savedIncident = incidentReportRepository.save(incidentReport);
-
-        // Créer une notification pour les admins
-        createAdminNotification(savedIncident);
-
-        return savedIncident;
-    }
-
-    @Transactional
-    public IncidentReport assignIncident(Long incidentId, Long technicianId) {
-        IncidentReport incident = incidentReportRepository.findById(incidentId)
-                .orElseThrow(() -> new RuntimeException("Incident non trouvé"));
-
-        User technician = userRepository.findById(technicianId)
-                .orElseThrow(() -> new RuntimeException("Technicien non trouvé"));
-
-        incident.setAssignedTo(technician);
-        incident.setStatus(IncidentStatus.ASSIGNED);
-
-        IncidentReport updatedIncident = incidentReportRepository.save(incident);
-
-        // Créer une notification pour le technicien
-        createTechnicianNotification(updatedIncident);
-
-        return updatedIncident;
-    }
-
-    public List<IncidentReport> getAllIncidents() {
-        return incidentReportRepository.findAll();
-    }
-
-    public Optional<IncidentReport> getIncidentById(Long id) {
-        return incidentReportRepository.findById(id);
-    }
-
-    public List<IncidentReport> getIncidentsByProject(Long projectId) {
-        return incidentReportRepository.findByProjectId(projectId);
-    }
-
-    public List<IncidentReport> getIncidentsByStatus(IncidentStatus status) {
-        return incidentReportRepository.findByStatus(status);
-    }
-
-    private void createAdminNotification(IncidentReport incident) {
-        Notification notification = new Notification();
-        notification.setMessage("Nouvel incident déclaré pour le projet: " +
-                incident.getProject().getName());
-        notification.setNotificationDate(java.time.LocalDateTime.now());
-        notification.setRead(false);
-        // Ici vous devriez définir l'admin comme receiver
-        // notification.setReceiver(adminUser);
-        notificationService.createNotification(notification);
-    }
-
-    private void createTechnicianNotification(IncidentReport incident) {
-        if (incident.getAssignedTo() != null) {
-            Notification notification = new Notification();
-            notification.setMessage("Vous avez été assigné à l'incident: " +
-                    incident.getDescription());
-            notification.setNotificationDate(java.time.LocalDateTime.now());
-            notification.setRead(false);
-            notification.setReceiver(incident.getAssignedTo());
-            notificationService.createNotification(notification);
-        }
+        // 5. Save using entity manager
+        entityManager.persist(incidentReport);
+        entityManager.flush();
+        return incidentReport;
     }
 }

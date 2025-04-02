@@ -12,48 +12,26 @@ public class Notification {
     private String message;
     private LocalDateTime notificationDate;
     private boolean isRead;
+    private String severity;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User receiver; // L'utilisateur qui reçoit la notification (admin ou technicien)
+    private Long receiverId; // Ajout du champ pour corriger l'erreur
 
-    public Long getId() {
-        return id;
-    }
+    // Getters et Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
 
-    public String getMessage() {
-        return message;
-    }
+    public LocalDateTime getNotificationDate() { return notificationDate; }
+    public void setNotificationDate(LocalDateTime notificationDate) { this.notificationDate = notificationDate; }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
+    public boolean isRead() { return isRead; }
+    public void setRead(boolean read) { isRead = read; }
 
-    public LocalDateTime getNotificationDate() {
-        return notificationDate;
-    }
+    public String getSeverity() { return severity; }
+    public void setSeverity(String severity) { this.severity = severity; }
 
-    public void setNotificationDate(LocalDateTime notificationDate) {
-        this.notificationDate = notificationDate;
-    }
-
-    public boolean isRead() {
-        return isRead;
-    }
-
-    public void setRead(boolean read) {
-        isRead = read;
-    }
-
-    public User getReceiver() {
-        return receiver;
-    }
-
-    public void setReceiver(User receiver) {
-        this.receiver = receiver;
-    }
+    public Long getReceiverId() { return receiverId; }
+    public void setReceiverId(Long receiverId) { this.receiverId = receiverId; }
 }

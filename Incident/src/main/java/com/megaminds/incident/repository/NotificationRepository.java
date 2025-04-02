@@ -1,10 +1,12 @@
-// src/main/java/com/megaminds/incident/repository/NotificationRepository.java
 package com.megaminds.incident.repository;
 
 import com.megaminds.incident.entity.Notification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
+@Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    List<Notification> findByReceiverId(Long userId);
+    List<Notification> findByReceiverId(Long receiverId); // Correction ici
 }
