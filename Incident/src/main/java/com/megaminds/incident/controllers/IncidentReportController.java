@@ -10,8 +10,14 @@ import com.megaminds.incident.service.IncidentReportService;
 import com.megaminds.incident.service.NotificationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailAuthenticationException;
+import org.springframework.mail.MailSendException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+import jakarta.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -30,20 +36,144 @@ public class IncidentReportController {
     private final UserRepository userRepository;
     private final IncidentReportRepository incidentReportRepository;
     private final IncidentActionRepository incidentActionRepository;
+    private final JavaMailSender mailSender;
 
+    // Constructor remains exactly the same
     public IncidentReportController(
             IncidentReportService incidentReportService,
             NotificationService notificationService,
             SimpMessagingTemplate messagingTemplate,
             UserRepository userRepository,
             IncidentReportRepository incidentReportRepository,
-            IncidentActionRepository incidentActionRepository) {
+            IncidentActionRepository incidentActionRepository,
+            JavaMailSender mailSender) {
         this.incidentReportService = incidentReportService;
         this.notificationService = notificationService;
         this.messagingTemplate = messagingTemplate;
         this.userRepository = userRepository;
         this.incidentReportRepository = incidentReportRepository;
         this.incidentActionRepository = incidentActionRepository;
+        this.mailSender = mailSender;
+    }
+
+    // Add this inner class for email results
+    private static class EmailResult {
+        final boolean success;
+        final String errorMessage;
+
+        EmailResult(boolean success, String errorMessage) {
+            this.success = success;
+            this.errorMessage = errorMessage;
+        }
+    }
+
+    // Updated assignIncident method
+    @PostMapping("/{incidentId}/assign")
+    public ResponseEntity<?> assignIncident(
+            @PathVariable Long incidentId,
+            @RequestBody AssignIncidentRequest request) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // 1. Process incident assignment
+            IncidentReport updatedIncident = incidentReportService.assignIncident(
+                    incidentId,
+                    request.getTechnicianId(),
+                    request.getAdminId(),
+                    request.getComments()
+            );
+
+            // 2. Create assignment action
+            IncidentAction action = new IncidentAction();
+            action.setDescription(request.getComments() != null ?
+                    request.getComments() : "Incident assigned to technician");
+            action.setActionDate(LocalDate.now());
+            action.setActionType(IncidentActionType.ASSIGNED);
+            action.setIncidentReport(updatedIncident);
+            action.setPerformedBy(userRepository.findById(request.getAdminId()).orElse(null));
+            incidentActionRepository.save(action);
+
+            // 3. Get technician details
+            User technician = userRepository.findById(request.getTechnicianId())
+                    .orElseThrow(() -> new RuntimeException("Technician not found"));
+
+            // 4. Create and send notification
+            Notification notification = new Notification();
+            notification.setMessage("New incident assigned to you: " + updatedIncident.getDescription());
+            notification.setNotificationDate(LocalDateTime.now());
+            notification.setRead(false);
+            notification.setSeverity(updatedIncident.getSeverity().name());
+            notification.setReceiverId(request.getTechnicianId());
+            notification.setIncidentReport(updatedIncident);
+
+            Notification savedNotification = notificationService.createNotification(notification);
+            messagingTemplate.convertAndSend("/topic/notifications", savedNotification);
+
+            // 5. Send email and prepare response
+            EmailResult emailResult = sendAssignmentEmail(technician, updatedIncident);
+
+            response.put("success", true);
+            response.put("incident", updatedIncident);
+            response.put("emailSent", emailResult.success);
+
+            if (!emailResult.success) {
+                response.put("emailError", emailResult.errorMessage);
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", "Failed to assign incident: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    // Helper method for sending emails
+    private EmailResult sendAssignmentEmail(User technician, IncidentReport incident) {
+        try {
+            SimpleMailMessage email = new SimpleMailMessage();
+            email.setTo(technician.getEmail());
+            email.setSubject("New Incident Assigned: #" + incident.getId());
+            email.setText(
+                    "Dear " + technician.getUsername() + ",\n\n" +
+                            "You have been assigned a new incident:\n\n" +
+                            "ID: " + incident.getId() + "\n" +
+                            "Description: " + incident.getDescription() + "\n" +
+                            "Severity: " + incident.getSeverity() + "\n" +
+                            "Project: " + incident.getProject().getName() + "\n\n" +
+                            "Please resolve it at your earliest convenience.\n\n" +
+                            "Thank you,\n" +
+                            "Incident Management System"
+            );
+
+            mailSender.send(email);
+            return new EmailResult(true, null);
+
+        } catch (MailAuthenticationException e) {
+            return new EmailResult(false, "SMTP Authentication Failed: " + e.getMessage());
+        } catch (MailSendException e) {
+            return new EmailResult(false, "Failed to send email: " + e.getMessage());
+        } catch (Exception e) {
+            return new EmailResult(false, "Unexpected error: " + e.getMessage());
+        }
+    }
+
+    // ALL YOUR EXISTING METHODS BELOW - THEY REMAIN EXACTLY THE SAME
+    @PostConstruct
+    public void debugMailConfig() {
+        if (mailSender instanceof JavaMailSenderImpl) {
+            JavaMailSenderImpl mailSenderImpl = (JavaMailSenderImpl) mailSender;
+            System.out.println("===== SMTP CONFIGURATION =====");
+            System.out.println("Host: " + mailSenderImpl.getHost());
+            System.out.println("Port: " + mailSenderImpl.getPort());
+            System.out.println("Username: " + mailSenderImpl.getUsername());
+            System.out.println("Password: " +
+                    (mailSenderImpl.getPassword() != null ? "******" : "NULL"));
+            System.out.println("Protocol: " + mailSenderImpl.getProtocol());
+            System.out.println("JavaMail Properties: " + mailSenderImpl.getJavaMailProperties());
+        }
     }
 
     @GetMapping("/{id}")
@@ -110,43 +240,51 @@ public class IncidentReportController {
         }
     }
 
-    @PostMapping("/{incidentId}/assign")
-    public ResponseEntity<IncidentReport> assignIncident(
-            @PathVariable Long incidentId,
-            @RequestBody AssignIncidentRequest request) {
+    @GetMapping("/test-email")
+    public String testEmail() {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo("houssem.moumni@esprit.tn");
+            message.setSubject("TEST from Incident Microservice");
+            message.setText("If you get this, email is working!");
+            mailSender.send(message);
+            return "Email sent! Check inbox/spam.";
+        } catch (Exception e) {
+            return "Email failed: " + e.getMessage();
+        }
+    }
 
-        IncidentReport updatedIncident = incidentReportService.assignIncident(
-                incidentId,
-                request.getTechnicianId(),
-                request.getAdminId(),
-                request.getComments()
-        );
+    @PatchMapping("/{id}/resolve")
+    public ResponseEntity<IncidentReport> resolveIncident(
+            @PathVariable Long id,
+            @RequestParam boolean resolved,
+            @RequestParam Long technicianId) {
 
-        // Create incident action
+        IncidentReport incident = incidentReportRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Incident not found"));
+
+        incident.setStatus(resolved ? IncidentStatus.RESOLVED : IncidentStatus.REOPENED);
+        IncidentReport updatedIncident = incidentReportRepository.save(incident);
+
         IncidentAction action = new IncidentAction();
-        action.setDescription(request.getComments() != null ? request.getComments() : "Incident assigned to technician");
+        action.setDescription(resolved ? "Incident resolved" : "Incident reopened");
         action.setActionDate(LocalDate.now());
-        action.setActionType(IncidentActionType.ASSIGNED);
+        action.setActionType(resolved ? IncidentActionType.RESOLVED : IncidentActionType.REOPENED);
         action.setIncidentReport(updatedIncident);
-        action.setPerformedBy(userRepository.findById(request.getAdminId()).orElse(null));
+        action.setPerformedBy(userRepository.findById(technicianId).orElse(null));
         incidentActionRepository.save(action);
 
-        // Notification to technician
-        User TECHNICIEN = userRepository.findById(request.getTechnicianId())
-                .orElseThrow(() -> new RuntimeException("Technician not found"));
-
-        Notification notification = new Notification();
-        notification.setMessage("New incident assigned to you: " + updatedIncident.getDescription());
-        notification.setNotificationDate(LocalDateTime.now());
-        notification.setRead(false);
-        notification.setSeverity(updatedIncident.getSeverity().name());
-        notification.setReceiverId(request.getTechnicianId());
-        notification.setIncidentReport(updatedIncident);
-
-        Notification savedNotification = notificationService.createNotification(notification);
-        messagingTemplate.convertAndSend("/topic/notifications", savedNotification);
-
         return ResponseEntity.ok(updatedIncident);
+    }
+
+    @GetMapping("/resolved")
+    public ResponseEntity<List<IncidentReport>> getResolvedIncidents() {
+        return ResponseEntity.ok(incidentReportRepository.findByStatus(IncidentStatus.RESOLVED));
+    }
+
+    @GetMapping("/unresolved")
+    public ResponseEntity<List<IncidentReport>> getUnresolvedIncidents() {
+        return ResponseEntity.ok(incidentReportRepository.findByStatusNot(IncidentStatus.RESOLVED));
     }
 
     @GetMapping("/technicians")
