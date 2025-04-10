@@ -14,7 +14,6 @@ import java.util.Optional;
 @RequestMapping("/api/interviews")
 @CrossOrigin(origins = "http://localhost:4200")
 public class InterviewController {
-
     private final InterviewService interviewService;
 
     public InterviewController(InterviewService interviewService) {
@@ -25,8 +24,8 @@ public class InterviewController {
     public ResponseEntity<Interview> scheduleInterview(
             @PathVariable Long applicationId,
             @RequestBody Interview interview) {
-        Interview newInterview = interviewService.scheduleInterview(applicationId, interview);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newInterview);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(interviewService.scheduleInterview(applicationId, interview));
     }
 
     @GetMapping("/application/{applicationId}")
@@ -36,16 +35,22 @@ public class InterviewController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Interview> getInterviewById(@PathVariable Long id) {
-        System.out.println("🔎 Recherche de l'entretien avec ID : " + id);
-        Optional<Interview> interview = interviewService.getInterviewById(id);
+        return interviewService.getInterviewById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-        if (interview.isPresent()) {
-            System.out.println("✅ Entretien trouvé : " + interview.get());
-            return ResponseEntity.ok(interview.get());
-        } else {
-            System.out.println("❌ Aucun entretien trouvé pour ID : " + id);
-            return ResponseEntity.notFound().build();
-        }
+    @GetMapping("/by-token")
+    public ResponseEntity<Interview> getInterviewByToken(@RequestParam String token) {
+        return interviewService.findByToken(token)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/activate")
+    public ResponseEntity<String> activateLink(@RequestParam String token) {
+        interviewService.activateInterviewLink(token);
+        return ResponseEntity.ok("Interview link activated successfully");
     }
 
     @PutMapping("/{id}")

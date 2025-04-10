@@ -2,6 +2,7 @@ package com.Megaminds.Recrutement.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 public class Interview {
@@ -14,8 +15,13 @@ public class Interview {
     private Application application;
 
     private LocalDate interviewDate;
+    private String interviewTime;
+    private String meetLink;
     private String feedback;
+    private String token;
+    private boolean linkActive;
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -40,11 +46,43 @@ public class Interview {
         this.interviewDate = interviewDate;
     }
 
+    public String getInterviewTime() {
+        return interviewTime;
+    }
+
+    public void setInterviewTime(String interviewTime) {
+        this.interviewTime = interviewTime;
+    }
+
+    public String getMeetLink() {
+        return meetLink;
+    }
+
+    public void setMeetLink(String meetLink) {
+        this.meetLink = meetLink;
+    }
+
     public String getFeedback() {
         return feedback;
     }
 
     public void setFeedback(String feedback) {
         this.feedback = feedback;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public boolean isLinkActive() {
+        return linkActive;
+    }
+
+    public void setLinkActive(boolean linkActive) {
+        this.linkActive = linkActive;
     }
 }

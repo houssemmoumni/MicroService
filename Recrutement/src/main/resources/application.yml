@@ -28,17 +28,35 @@ spring:
           auth: true
           starttls:
             enable: true
+          connectiontimeout: 5000    # Timeout de connexion en ms
+          timeout: 5000              # Timeout de lecture en ms
+          writetimeout: 5000         # Timeout d'écriture en ms
   servlet:
     multipart:
       max-file-size: 10MB  # Taille maximale d'un fichier uploadé
       max-request-size: 20MB  # Taille maximale de la requête
   config:
     import: optional:configserver:http://localhost:8888  # Configuration Spring Cloud Config
+  task:
+    scheduling:
+      pool:
+        size: 10  # Taille du pool de threads pour les tâches planifiées
+
+# Configuration spécifique à l'application
+app:
+  frontend-url: http://localhost:4200  # URL de votre application Angular
+  interview:
+    default-time: "14:00"             # Heure par défaut pour les entretiens
+    days-until-interview: 4           # Nombre de jours avant l'entretien après acceptation
+    reminder-hours-before: 24         # Rappel 24h avant l'entretien
+    final-reminder-hours-before: 1    # Rappel final 1h avant
+    link-activation-hours-before: 24  # Activation du lien 24h avant
 
 logging:
   level:
     org.hibernate.SQL: DEBUG  # Active les logs SQL
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # Active les logs des paramètres SQL
+    com.Megaminds.Recrutement: DEBUG  # Logs pour votre application
 
 springdoc:
   api-docs:

@@ -3,6 +3,7 @@ package com.Megaminds.Recrutement.controllers;
 import com.Megaminds.Recrutement.entity.*;
 import com.Megaminds.Recrutement.repository.*;
 import com.Megaminds.Recrutement.service.EmailService;
+import com.Megaminds.Recrutement.service.InterviewService;
 import com.Megaminds.Recrutement.service.NotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,16 +26,19 @@ public class ApplicationController {
     private final EmailService emailService;
     private final NotificationService notificationService;
     private final InterviewRepository interviewRepository;
+    private final InterviewService interviewService;
 
     public ApplicationController(ApplicationRepository applicationRepository,
                                  CandidateRepository candidateRepository,
                                  JobOfferRepository jobOfferRepository,
                                  EmailService emailService,
                                  NotificationService notificationService,
-                                 InterviewRepository interviewRepository) {
+                                 InterviewRepository interviewRepository,
+                                 InterviewService interviewService) {
         this.applicationRepository = applicationRepository;
         this.candidateRepository = candidateRepository;
         this.jobOfferRepository = jobOfferRepository;
+        this.interviewService = interviewService;
         this.emailService = emailService;
         this.notificationService = notificationService;
         this.interviewRepository = interviewRepository;
@@ -62,19 +66,16 @@ public class ApplicationController {
             if (candidateId != null) {
                 candidate = candidateRepository.findById(candidateId)
                         .orElseThrow(() -> new RuntimeException("Candidat introuvable"));
-                candidate.setFirstName(firstName);
-                candidate.setLastName(lastName);
-                candidate.setEmail(email);
-                candidate.setPhoneNumber(phoneNumber);
-                candidate.setAddress(address);
             } else {
-                candidate = new Candidate();
-                candidate.setFirstName(firstName);
-                candidate.setLastName(lastName);
-                candidate.setEmail(email);
-                candidate.setPhoneNumber(phoneNumber);
-                candidate.setAddress(address);
+                candidate = new Candidate(); // constructeur vide
             }
+
+            // Mettre à jour les informations du candidat
+            candidate.setFirstName(firstName);
+            candidate.setLastName(lastName);
+            candidate.setEmail(email);
+            candidate.setPhoneNumber(phoneNumber);
+            candidate.setAddress(address);
             candidateRepository.save(candidate);
 
             Application application = new Application();
@@ -106,7 +107,7 @@ public class ApplicationController {
         Optional<Application> applicationOpt = applicationRepository.findById(id);
 
         if (applicationOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Candidature introuvable.");
+            return ResponseEntity.badRequest().body("Application not found");
         }
 
         try {
@@ -116,39 +117,33 @@ public class ApplicationController {
 
             Candidate candidate = application.getCandidate();
 
-            String subject = "Statut de votre candidature";
+            String subject = "Application Status Update";
             String text;
             if (status.equalsIgnoreCase("ACCEPTED")) {
-                text = "Félicitations ! Votre candidature pour l'offre d'emploi '" + application.getJobOffer().getTitle() + "' a été acceptée.";
+                text = "Congratulations! Your application for " +
+                        application.getJobOffer().getTitle() + " has been accepted.";
 
-                // Create an interview for the accepted application
-                Interview interview = new Interview();
-                interview.setApplication(application);
-                interview.setInterviewDate(LocalDate.now().plusDays(7)); // Example: Interview in 7 days
-                interview.setFeedback("Veuillez préparer votre entretien.");
-                interviewRepository.save(interview); // Save the interview
+                // Schedule automated interview
+                Interview interview = interviewService.scheduleAutomatedInterview(application);
 
-                // Create a notification with the interview link
                 notificationService.createNotification(
-                        "success", // Type de notification
-                        "La candidature de " + candidate.getFirstName() + " " + candidate.getLastName() + " a été acceptée.", // Message
-                        application.getId(), // ID de la candidature
-                        interview.getId() // ID de l'entretien
+                        "success",
+                        "Interview scheduled for " + candidate.getFirstName() + " " + candidate.getLastName(),
+                        application.getId(),
+                        interview.getId()
                 );
             } else if (status.equalsIgnoreCase("REJECTED")) {
-                text = "Nous regrettons de vous informer que votre candidature pour l'offre d'emploi '" + application.getJobOffer().getTitle() + "' a été rejetée.";
+                text = "We regret to inform you that your application for " +
+                        application.getJobOffer().getTitle() + " has been rejected.";
             } else {
-                text = "Le statut de votre candidature pour l'offre d'emploi '" + application.getJobOffer().getTitle() + "' a été mis à jour.";
+                text = "Your application status for " +
+                        application.getJobOffer().getTitle() + " has been updated.";
             }
 
-            // Send email to the candidate
             emailService.sendEmail(candidate.getEmail(), subject, text);
-
-            return ResponseEntity.ok(Collections.singletonMap("message", "Statut mis à jour avec succès !"));
+            return ResponseEntity.ok(Collections.singletonMap("message", "Status updated successfully"));
         } catch (Exception e) {
-            System.err.println("Erreur lors de la mise à jour du statut : " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Erreur lors de la mise à jour du statut.");
+            return ResponseEntity.internalServerError().body("Error updating status: " + e.getMessage());
         }
     }
 }
