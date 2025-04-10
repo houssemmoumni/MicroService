@@ -1,0 +1,38 @@
+server:
+  port: 8222
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: order-service
+          uri: lb:http://ORDER-SERVICE
+          predicates:
+              - Path=/api/v1/orders/**
+        - id: order-lines-service
+          uri: lb:http://ORDER-SERVICE
+          predicates:
+               - Path=/api/v1/order-lines/**
+        - id: material-service
+          uri: lb:http://MATERIAL-SERVICE
+          predicates:
+               - Path=/api/v1/materials/**
+        - id: payment-service
+          uri: lb:http://PAYMENT-SERVICE
+          predicates:
+               - Path=/api/v1/payments/**
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins: "http://localhost:4200" # Allow requests from Angular app
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600 # Cache preflight response for 1 hour
