@@ -1,10 +1,15 @@
 ## README-GUIDE
+Guide detaillé de module Task 
 
 
 ## NOM DU PROJET
 Consprit
 
-#DESCRIPTION
+# DESCRIPTION
+Task management is a module dedicated to workers and project managers 
+it is close to jira in managing the tasks , drag and drop the tasks between Pending completed and in progress
+we have comments in real time 
+notification in real time
 
 ## TABLE DE MATIERE
 - [INSTALLATION] (#installation)
