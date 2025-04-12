@@ -4,6 +4,7 @@ import com.megaminds.finance.Entity.FinancialReport;
 import com.megaminds.finance.Repository.FinancialReportRepository;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,11 +13,14 @@ import java.util.List;
 public class FinancialReportService {
     @Autowired
     private FinancialReportRepository financialReportRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     private final EmailService emailService;
 
-    public FinancialReportService(EmailService emailService) {
+    public FinancialReportService(EmailService emailService, FinancialReportRepository financialReportRepository, SimpMessagingTemplate messagingTemplate) {
         this.emailService = emailService;
+        this.financialReportRepository = financialReportRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
 
@@ -33,12 +37,17 @@ public class FinancialReportService {
     }
     public void generateAndSendReport(FinancialReport report) {
         try {
-            // Assuming report is already populated with necessary data (e.g., from DB)
-            emailService.sendFinancialReport(report);  // Send the financial report via email
+            emailService.sendFinancialReport(report);
+
+            // Send WebSocket notification
+            messagingTemplate.convertAndSend("/topic/notifications",
+                    "📨 Financial report sent to " + report.getEmail());
+
         } catch (MessagingException e) {
             throw new RuntimeException("Failed to send financial report email", e);
         }
     }
+
 
     public FinancialReport updateFinancialReport(Long id, FinancialReport financialReportDetails) {
         FinancialReport financialReport = financialReportRepository.findById(id).orElseThrow(() -> new RuntimeException("Financial Report not found"));
