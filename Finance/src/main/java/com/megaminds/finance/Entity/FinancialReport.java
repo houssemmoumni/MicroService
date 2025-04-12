@@ -24,9 +24,19 @@ public class FinancialReport {
 
     @Column(nullable = false)
     private Double net_profit;
+    private String email;
+
 
     public Long getId_rapport() {
         return id_rapport;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public void setId_rapport(Long id_rapport) {

@@ -26,6 +26,11 @@ public class FinancialReportController {
         FinancialReport financialReport = financialReportService.getFinancialReportById(id);
         return ResponseEntity.ok(financialReport);
     }
+        @PostMapping("/send")
+        public String sendReport(@RequestBody FinancialReport report) {
+            financialReportService.generateAndSendReport(report);  // Send the financial report
+            return "Financial Report sent successfully!";
+        }
 
     @PostMapping
     public FinancialReport createFinancialReport(@RequestBody FinancialReport financialReport) {

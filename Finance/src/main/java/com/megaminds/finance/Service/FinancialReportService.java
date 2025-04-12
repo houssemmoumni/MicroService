@@ -2,6 +2,7 @@ package com.megaminds.finance.Service;
 
 import com.megaminds.finance.Entity.FinancialReport;
 import com.megaminds.finance.Repository.FinancialReportRepository;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,9 +10,15 @@ import java.util.List;
 
 @Service
 public class FinancialReportService {
-
     @Autowired
     private FinancialReportRepository financialReportRepository;
+
+    private final EmailService emailService;
+
+    public FinancialReportService(EmailService emailService) {
+        this.emailService = emailService;
+    }
+
 
     public List<FinancialReport> getAllFinancialReports() {
         return financialReportRepository.findAll();
@@ -23,6 +30,14 @@ public class FinancialReportService {
 
     public FinancialReport createFinancialReport(FinancialReport financialReport) {
         return financialReportRepository.save(financialReport);
+    }
+    public void generateAndSendReport(FinancialReport report) {
+        try {
+            // Assuming report is already populated with necessary data (e.g., from DB)
+            emailService.sendFinancialReport(report);  // Send the financial report via email
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send financial report email", e);
+        }
     }
 
     public FinancialReport updateFinancialReport(Long id, FinancialReport financialReportDetails) {

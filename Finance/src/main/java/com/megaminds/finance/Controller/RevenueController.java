@@ -1,6 +1,8 @@
 package com.megaminds.finance.Controller;
 
+import com.megaminds.finance.Entity.ProjectDTO;
 import com.megaminds.finance.Entity.Revenue;
+import com.megaminds.finance.Service.ProjectClient;
 import com.megaminds.finance.Service.RevenueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/revenues")
 public class RevenueController {
+    @Autowired
+    private ProjectClient projectClient;
 
     @Autowired
     private RevenueService revenueService;
@@ -43,4 +47,9 @@ public class RevenueController {
         revenueService.deleteRevenue(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/external-projects")
+    public ResponseEntity<List<ProjectDTO>> getExternalProjects() {
+        return ResponseEntity.ok(projectClient.getAllProjects());
+    }
+
 }
