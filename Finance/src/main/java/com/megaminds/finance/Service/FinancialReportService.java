@@ -37,17 +37,12 @@ public class FinancialReportService {
     }
     public void generateAndSendReport(FinancialReport report) {
         try {
-            emailService.sendFinancialReport(report);
-
-            // Send WebSocket notification
-            messagingTemplate.convertAndSend("/topic/notifications",
-                    "📨 Financial report sent to " + report.getEmail());
-
+            // Assuming report is already populated with necessary data (e.g., from DB)
+            emailService.sendFinancialReport(report);  // Send the financial report via email
         } catch (MessagingException e) {
             throw new RuntimeException("Failed to send financial report email", e);
         }
     }
-
 
     public FinancialReport updateFinancialReport(Long id, FinancialReport financialReportDetails) {
         FinancialReport financialReport = financialReportRepository.findById(id).orElseThrow(() -> new RuntimeException("Financial Report not found"));
