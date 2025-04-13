@@ -27,9 +27,11 @@ public class FinancialReportController {
 
     @PostMapping("/download")
     public ResponseEntity<byte[]> downloadReport(@RequestBody FinancialReport report) {
+        // Save report with signature to the database (if required)
+        financialReportService.saveFinancialReport(report); // Assuming there's a save method
+
         ByteArrayInputStream pdfStream = pdfService.generateReportPdf(report);
-        byte[] pdfBytes;
-        pdfBytes = pdfStream.readAllBytes();
+        byte[] pdfBytes = pdfStream.readAllBytes();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);

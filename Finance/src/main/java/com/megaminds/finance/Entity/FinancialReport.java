@@ -34,6 +34,8 @@ public class FinancialReport {
     public String getEmail() {
         return email;
     }
+    @Lob // Use @Lob for large object data like Base64 encoded string
+    private String signature;  // To store the signature as a Base64 string
 
     public void setEmail(String email) {
         this.email = email;
@@ -61,6 +63,14 @@ public class FinancialReport {
 
     public Double getNet_profit() {
         return net_profit;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
     }
 
     public void setNet_profit(Double net_profit) {

@@ -35,6 +35,9 @@ public class FinancialReportService {
     public FinancialReport createFinancialReport(FinancialReport financialReport) {
         return financialReportRepository.save(financialReport);
     }
+    public FinancialReport saveFinancialReport(FinancialReport report) {
+        return financialReportRepository.save(report);
+    }
     public void generateAndSendReport(FinancialReport report) {
         try {
             // Assuming report is already populated with necessary data (e.g., from DB)
