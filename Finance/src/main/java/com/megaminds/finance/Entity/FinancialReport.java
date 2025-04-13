@@ -26,6 +26,15 @@ public class FinancialReport {
     private Double net_profit;
     private String email;
 
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Long getId_rapport() {
         return id_rapport;

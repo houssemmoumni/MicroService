@@ -9,7 +9,7 @@ public class ImageToBase64 {
         // Path to your signature image
         String imagePath = "C:\\Users\\asust\\Downloads\\mega1.png"; // Make sure the file has .png extension
 
-        // Read image bytes
+          // Read image bytes
         byte[] fileContent = Files.readAllBytes(Paths.get(imagePath));
 
         // Convert to Base64

@@ -37,6 +37,9 @@
                     table.setWidthPercentage(100);
                     table.setWidths(new int[]{1, 2});
                     table.setSpacingBefore(10f);
+                    addRow(table, "nom :", report.getName(), labelFont, valueFont);
+
+                    addRow(table, "Date du rapport :", report.getDate_rapport().toString(), labelFont, valueFont);
 
                     addRow(table, "Date du rapport :", report.getDate_rapport().toString(), labelFont, valueFont);
                     addRow(table, "Revenu total :", report.getTotal_revenue() + " €", labelFont, valueFont);
