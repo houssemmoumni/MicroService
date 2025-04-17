@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<body>
+<h3>Testeur WebSocket</h3>
+<button onclick="connect()">Connexion</button><br>
+<button onclick="subscribe()">S'abonner</button><br>
+<input id="message" placeholder="Message">
+<button onclick="send()">Envoyer</button>
+<pre id="logs"></pre>
+
+<script>
+    let ws;
+    function connect() {
+        ws = new WebSocket('ws://localhost:8093/Communication_Service/ws');
+        ws.onmessage = (e) => document.getElementById('logs').textContent += e.data + '\n';
+        log("► Prêt à se connecter...");
+    }
+
+    function subscribe() {
+        ws.send("SUBSCRIBE\nid:sub-1\ndestination:/topic/chatroom/1\n\n\0");
+        log("► Abonné à /topic/chatroom/1");
+    }
+
+    function send() {
+        const msg = {
+            senderId: 1,
+            chatRoomId: 1,
+            content: document.getElementById('message').value
+        };
+        ws.send(`SEND\ndestination:/app/chat.send\ncontent-type:application/json\n\n${JSON.stringify(msg)}\n\0`);
+        log("► Message envoyé");
+    }
+
+    function log(text) {
+        document.getElementById('logs').textContent += text + '\n';
+    }
+</script>
+</body>

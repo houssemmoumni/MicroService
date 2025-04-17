@@ -1,0 +1,40 @@
+server:
+  port: 8035  # Configuration du serveur
+
+spring:
+  application:
+    name: pointage  # Nom du microservice
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/pointage?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  jackson:
+    date-format: yyyy-MM-dd
+    time-zone: UTC
+
+  config:
+    import: optional:configserver:http://localhost:8888
+
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

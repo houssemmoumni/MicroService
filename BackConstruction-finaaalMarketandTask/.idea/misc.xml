@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+    <component name="ExternalStorageConfigurationManager" enabled="true" />
+    <component name="MavenProjectsManager">
+        <option name="originalFiles">
+            <list>
+                <option value="$PROJECT_DIR$/pom.xml" />
+                <option value="$PROJECT_DIR$/Back/pom.xml" />
+                <option value="$PROJECT_DIR$/config-server/pom.xml" />
+                <option value="$PROJECT_DIR$/discovery/pom.xml" />
+                <option value="$PROJECT_DIR$/gateway/pom.xml" />
+                <option value="$PROJECT_DIR$/payment/pom.xml" />
+                <option value="$PROJECT_DIR$/material/pom.xml" />
+                <option value="$PROJECT_DIR$/order/pom.xml" />
+                <option value="$PROJECT_DIR$/Task/pom.xml" />
+                <option value="$PROJECT_DIR$/User-service/pom.xml" />
+                <option value="$PROJECT_DIR$/Finance/pom.xml" />
+                <option value="$PROJECT_DIR$/Recrutement/pom.xml" />
+                <option value="$PROJECT_DIR$/Incident/pom.xml" />
+                <option value="$PROJECT_DIR$/matriel/pom.xml" />
+                <option value="$PROJECT_DIR$/project/pom.xml" />
+                <option value="$PROJECT_DIR$/BackConstruction-main/pom.xml" />
+                <option value="$PROJECT_DIR$/BackConstruction-main/config-server/pom.xml" />
+                <option value="$PROJECT_DIR$/BackConstruction-main/discovery/pom.xml" />
+                <option value="$PROJECT_DIR$/BackConstruction-main/Communication_Service/Communication_Service/pom.xml" />
+                <option value="$PROJECT_DIR$/BackConstruction-main/Blog_Formation_Service/Blog_Formation_Service/pom.xml" />
+                <option value="$PROJECT_DIR$/BackConstruction-main/Course_Service/Course_Service/pom.xml" />
+                <option value="$PROJECT_DIR$/BackConstruction-main/Gateway/Gateway/pom.xml" />
+                <option value="$PROJECT_DIR$/Blog_Formation_Service/Blog_Formation_Service/pom.xml" />
+                <option value="$PROJECT_DIR$/Course_Service/Course_Service/pom.xml" />
+                <option value="$PROJECT_DIR$/Communication_Service/Communication_Service/pom.xml" />
+                <option value="$PROJECT_DIR$/notification/pom.xml" />
+                <option value="$PROJECT_DIR$/assurance/pom.xml" />
+                <option value="$PROJECT_DIR$/pointage/pom.xml" />
+            </list>
+        </option>
+        <option name="ignoredFiles">
+            <set>
+                <option value="$PROJECT_DIR$/BackConstruction-main/pom.xml" />
+                <option value="$PROJECT_DIR$/User-service/pom.xml" />
+                <option value="$PROJECT_DIR$/matriel/pom.xml" />
+            </set>
+        </option>
+    </component>
+    <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="17" project-jdk-type="JavaSDK">
+        <output url="file://$PROJECT_DIR$/out" />
+    </component>
+</project>

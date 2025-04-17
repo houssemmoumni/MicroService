@@ -1,0 +1,115 @@
+server:
+  port: 8222
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      websocket:
+        enabled: true
+      routes:
+        - id: order-service
+          uri: lb:http://ORDER-SERVICE
+          predicates:
+              - Path=/api/v1/orders/**
+        - id: task-service
+          uri: lb:http://TASK-SERVICE
+          predicates:
+              - Path=/api/v1/tasks/**
+        - id: comment-service
+          uri: lb://TASK-SERVICE
+          predicates:
+              - Path=/api/comments/**
+        - id: websocket-route
+          uri: lb://TASK-SERVICE
+          predicates:
+            - Path=/ws/**
+          filters:
+            - RewritePath=/ws/(?<segment>.*), /$\{segment}  # Remove /ws prefix
+            - StripPrefix=1  # Strip the /ws prefix for routing
+        - id: order-lines-service
+          uri: lb:http://ORDER-SERVICE
+          predicates:
+               - Path=/api/v1/order-lines/**
+        - id: material-service
+          uri: lb:http://MATERIAL-SERVICE
+          predicates:
+               - Path=/api/v1/materials/**
+        - id: payment-service
+          uri: lb:http://PAYMENT-SERVICE
+          predicates:
+               - Path=/api/v1/payments/**
+        - id: project-service
+          uri: lb:http://PROJECT-SERVICE
+          predicates:
+            - Path=/pro/**
+            - Path=/workers/**
+        - id: expenses-service
+          uri: lb:http://FINANCE-SERVICE
+          predicates:
+            - Path=/api/expenses/**
+        - id: budget-service
+          uri: lb:http://FINANCE-SERVICE
+          predicates:
+            - Path=/api/budgets/**
+        - id: finance-service
+          uri: lb:http://Finance
+          predicates:
+            - Path=/api/financial-reports/**
+        - id: revenues-service
+          uri: lb:http://FINANCE-SERVICE
+          predicates:
+            - Path=/api/revenues/**
+        - id: sms-service
+          uri: lb:http://FINANCE-SERVICE
+          predicates:
+            - Path=/api/sms/**
+
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/service/user/**
+
+        # Route for assurances
+        - id: assurances-route
+          uri: lb://ASSURANCE-SERVICE
+          predicates:
+            - Path=/api/assurances/**
+
+        # Route for contrats
+        - id: contrats-route
+          uri: lb://ASSURANCE-SERVICE
+          predicates:
+            - Path=/api/contrats/**
+
+        # Route for maintenances
+        - id: maintenances-route
+          uri: lb://ASSURANCE-SERVICE
+          predicates:
+            - Path=/api/maintenances/**
+
+        # Route for projets
+        - id: projets-route
+          uri: lb://ASSURANCE-SERVICE
+          predicates:
+            - Path=/api/projets/**
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins:
+              - "http://localhost:4200" # Allow requests from Angular app
+              - "http://localhost:*"  # For WebSocket connections
+
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600 # Cache preflight response for 1 hour
+

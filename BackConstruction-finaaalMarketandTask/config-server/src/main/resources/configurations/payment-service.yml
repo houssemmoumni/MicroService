@@ -1,0 +1,28 @@
+spring:
+  stripe:
+    secret-key: sk_test_51QwpSRRrmrj6M3Hu7Vba6ozt2t5mhaysT3vcMuqfZMsDK1JMBI18XJMNBsOKKjiXxBjzsjJx4M3ULWbVn0Mzpxj600nc0axqkK
+    public-key: pk_test_51QwpSRRrmrj6M3HuRTR4Lav7Os5WXi5PYLH9ghUd3AUnR9XszaBNEkgfBSSXmy9FqLC0pp8G7guEpvjD1g5Kb9QF00yWR7qQRq
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/payment?createDatabaseIfNotExist=true
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
+    show-sql: true
+  #kafka:
+   # producer:
+    #  bootstrap-servers: localhost:9092
+     # key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      #value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      #properties:
+        #spring.json.type.mapping: paymentConfirmation:com.alibou.ecommerce.notification.PaymentNotificationRequest
+  application:
+    config:
+      product-url: http://localhost:8222/api/v1/materials
+server:
+  port: 8090

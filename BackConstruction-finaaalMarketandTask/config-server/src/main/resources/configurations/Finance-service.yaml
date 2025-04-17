@@ -1,0 +1,74 @@
+spring:
+  application:
+    name: Finance
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/Finance?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  config:
+    import: optional:configserver:http://localhost:8888
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ferjaouiaziz@gmail.com
+    password: pkow qxnq jbay mysu
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/constructionRealm
+
+server:
+  port: 8045
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+twilio:
+  account:
+    sid: ACa89d3f7147591c87f393cf345465b10b
+  auth:
+    token: 05445a2da7ad47ec167e136abd9fbd57
+  phone:
+    number: +18052738472
+  messaging:
+    service:
+      sid: MG57c47a866d7122861e2f9d53214b22d3
+
+notification:
+  phone: +21699593596
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.twilio: DEBUG
+    org.springframework.web: DEBUG
+
+user-service:
+  ribbon:
+    eureka:
+      enabled: true

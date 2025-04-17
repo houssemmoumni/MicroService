@@ -1,0 +1,12 @@
+spring:
+  config:
+    import: optional:configserver:http://localhost:8888
+  application:
+    name: order-service
+
+
+
+twilio:
+  accountSid: AC0c7a0c7ff7476a5e4f2b23aa272decb2
+  authToken: cf5bf79d1fba743e530331d18377da8b
+  fromNumber: +19893732633

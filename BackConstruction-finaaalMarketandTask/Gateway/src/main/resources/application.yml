@@ -1,0 +1,57 @@
+server:
+  port: 8222
+
+spring:
+  application:
+    name: gateway-service
+  config:
+    import: optional:configserver:http://localhost:8888
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      routes:
+        # Unified INCIDENT service routes
+        - id: incident-service
+          uri: lb://INCIDENT
+          predicates:
+            - Path=/api/incidents/**,/api/incident-actions/**,/api/notifications/**,/api/users/**,/api/projects/**
+          filters:
+            - RewritePath=/api/(?<path>.*), /api/$\{path}
+
+        # Recruitment service route
+        - id: recruitment-service
+          uri: lb://RECRUTEMENT
+          predicates:
+            - Path=/api/recruitment/**
+          filters:
+            - RewritePath=/api/recruitment/(?<segment>.*), /api/recruitment/$\{segment}
+
+# Eureka Configuration
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+    instance-id: ${spring.application.name}:${server.port}
+
+# Actuator Configuration (Fixed syntax)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+# Debug-level logging
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: DEBUG
+    reactor.netty.http.client: DEBUG
