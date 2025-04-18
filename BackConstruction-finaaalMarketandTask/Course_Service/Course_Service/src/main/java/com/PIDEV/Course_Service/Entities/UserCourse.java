@@ -23,18 +23,15 @@ public class UserCourse {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JsonIgnoreProperties("userCourses")
-    @JoinColumn(name = "user_id")
-    private User user;
+    private Long userId;  // Référence à l'ID de l'utilisateur dans le user_service
 
     @ManyToOne
     @JsonIgnoreProperties("userCourses")
     @JoinColumn(name = "course_id")
     private Course course;
 
-    private boolean isCompleted; // Indique si le cours est terminé
-    private LocalDate completionDate; // Date de fin du cours
+    private boolean isCompleted;
+    private LocalDate completionDate;
 
     @OneToOne(mappedBy = "userCourse", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
@@ -48,12 +45,12 @@ public class UserCourse {
         this.id = id;
     }
 
-    public User getUser() {
-        return user;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public Course getCourse() {

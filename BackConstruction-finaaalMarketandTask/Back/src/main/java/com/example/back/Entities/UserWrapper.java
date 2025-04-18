@@ -15,7 +15,6 @@ public class UserWrapper {
     @Getter
     private UserRepresentation keycloakUser;
     private User user;
-    private String imageUrl; // Add this field
 
     public void setKeycloakUser(UserRepresentation keycloakUser) {
         this.keycloakUser = keycloakUser;

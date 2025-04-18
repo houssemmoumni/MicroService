@@ -24,9 +24,15 @@ public interface    UserService {
 
     public User GetUserByUserName(String username);
 
+    List<User> getUsersByRole(String role);
 
+
+    User updateUserProfile(String email, String firstName, String lastName, int numTel);
 
     boolean existsByLogin(String login);
 
     User findById(Long idadmin);
+    List<User> getOuvriers();
+
+
 }

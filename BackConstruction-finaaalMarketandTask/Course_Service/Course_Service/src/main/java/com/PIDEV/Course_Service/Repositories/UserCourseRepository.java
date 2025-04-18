@@ -11,11 +11,17 @@ import java.util.Optional;
 
 @Repository
 public interface UserCourseRepository extends JpaRepository<UserCourse, Long> {
+
+    // Modification ici: utilisez userId directement
     Optional<UserCourse> findByUserIdAndCourseId(Long userId, Long courseId);
 
-    // Récupérer les UserCourse avec les données de Course
-    @Query("SELECT uc FROM UserCourse uc JOIN FETCH uc.course WHERE uc.user.id = :userId")
+    // Modifiez cette requête pour utiliser userId au lieu de user.id
+    @Query("SELECT uc FROM UserCourse uc JOIN FETCH uc.course WHERE uc.userId = :userId")
     List<UserCourse> findByUserIdWithCourse(@Param("userId") Long userId);
 
+    // Cette méthode reste inchangée
     List<UserCourse> findByCourseId(Long courseId);
+
+    // Ajoutez cette nouvelle méthode si nécessaire
+    List<UserCourse> findByUserId(Long userId);
 }

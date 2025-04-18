@@ -10,14 +10,11 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.springframework.stereotype.Service;
 import org.keycloak.representations.idm.UserRepresentation;
-import com.example.back.Entities.Enums.UserRole;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static com.example.back.Entities.Enums.UserRole.user;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +40,7 @@ public class UserServiceImp implements UserService {
     public User UpdateUser(User updatedUser) {
         try {
             // ✅ Fetch the user from Keycloak using their username (login)
-            List<UserRepresentation> keycloakUsers = keycloak.realm("constructionRealm")
+            List<UserRepresentation> keycloakUsers = keycloak.realm("myRealm")
                     .users()
                     .search(updatedUser.getLogin());
 
@@ -61,7 +58,7 @@ public class UserServiceImp implements UserService {
             keycloakUser.setEmail(updatedUser.getEmail());
 
             // ✅ Send the update request to Keycloak
-            keycloak.realm("constructionRealm").users().get(keycloakUserId).update(keycloakUser);
+            keycloak.realm("myRealm").users().get(keycloakUserId).update(keycloakUser);
             log.info("✅ User updated in Keycloak: " + updatedUser.getLogin());
 
             // ✅ After successful Keycloak update, update the database
@@ -93,10 +90,15 @@ public class UserServiceImp implements UserService {
         return userRepository.findByLogin(username);
     }
 
+    @Override
+    public List<User> getUsersByRole(String role) {
+        return List.of();
+    }
+
 
     public void assignRoles(String userId, List<String> roles) {
         List<RoleRepresentation> roleList = rolesToRealmRoleRepresentation(roles);
-        keycloak.realm("constructionRealm")
+        keycloak.realm("myRealm")
                 .users()
                 .get(userId)
                 .roles()
@@ -106,7 +108,7 @@ public class UserServiceImp implements UserService {
 
 
     private List<RoleRepresentation> rolesToRealmRoleRepresentation(List<String> roles) {
-        List<RoleRepresentation> existingRoles = keycloak.realm("constructionRealm")
+        List<RoleRepresentation> existingRoles = keycloak.realm("myRealm")
                 .roles()
                 .list();
 
@@ -127,6 +129,28 @@ public class UserServiceImp implements UserService {
         return resultRoles;
     }
 
+    public List<User> getOuvriers() {
+        List<User> allUsers = userRepository.findAll();
+        return allUsers.stream()
+                .filter(user -> user.getRole().equalsIgnoreCase("ouvrier"))
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public User updateUserProfile(String email, String firstName, String lastName, int numTel) {
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setNum_tel(numTel);
+            return userRepository.save(user);  // Sauvegarder les modifications dans la base de données
+        }
+        return null;  // Si l'utilisateur n'existe pas
+    }
+
+
+
 
 
     private final UserRepository userRepos;
@@ -136,7 +160,6 @@ public class UserServiceImp implements UserService {
         return userRepository.findByLogin(login) != null;
     }
 
-    // Schedule this method to run every hour
 
     @Override
     public User findById(Long idadmin) {

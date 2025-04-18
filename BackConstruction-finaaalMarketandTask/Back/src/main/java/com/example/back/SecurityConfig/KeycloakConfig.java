@@ -35,7 +35,7 @@
             if (keycloak == null) {
                 keycloak = KeycloakBuilder.builder()
                         .serverUrl("http://localhost:8080/")
-                        .realm("constructionRealm")
+                        .realm("myRealm")
                         .grantType(OAuth2Constants.PASSWORD)
                         .username("mehdi.by02@gmail.com")
                         .password("user")
@@ -46,16 +46,10 @@
             return keycloak;
         }
 
-        public String getUserPhoneNumber(String userId) {
-            List<UserRepresentation> users = keycloak.realm("constructionRealm").users().search(userId);
-            if (!users.isEmpty() && users.get(0).getAttributes().containsKey("phone_number")) {
-                return users.get(0).getAttributes().get("phone_number").get(0);
-            }
-            return null;
-        }
+
 
         public static List<UserRepresentation> getAllUsers() {
-            return getInstance().realm("constructionRealm").users().list();
+            return getInstance().realm("myRealm").users().list();
         }
 
         public static List<Map<String, Object>> getUserLoginEvents(String realm, String username) {
@@ -137,7 +131,6 @@
                 }
             }
 
-            // Fallback: Get public IP from an external service
             return getPublicIP();
         }
         private static String getPublicIP() {
@@ -156,48 +149,8 @@
             }
         }
 
-        private static String getLocalIP() {
-            try {
-                InetAddress localHost = InetAddress.getLocalHost();
-                return localHost.getHostAddress();
-            } catch (Exception e) {
-                return "Unknown";
-            }
-        }
 
 
-        /**
-         * Retrieves location data based on IP address using ip-api.com
-         */
-        private static Map<String, String> getLocationFromIP(String ip) {
-            try {
-                Client client = ClientBuilder.newClient();
-                WebTarget target = client.target("https://ip-api.com/json/" + ip);
-                Response response = target.request().get();
-                String jsonResponse = response.readEntity(String.class);
-                response.close();
-
-                JSONObject json = new JSONObject(jsonResponse);
-                if ("fail".equals(json.optString("status"))) {
-                    return Map.of("location", "Unknown");
-                }
-
-                return Map.of(
-                        "city", json.optString("city", "Unknown"),
-                        "region", json.optString("regionName", "Unknown"),
-                        "country", json.optString("country", "Unknown"),
-                        "latitude", json.optString("lat", "Unknown"),
-                        "longitude", json.optString("lon", "Unknown")
-                );
-
-            } catch (Exception e) {
-                return Map.of("location", "Ariana,Tunisia");
-            }
-        }
-
-        /**
-         * Retrieves location data based on IP address using MaxMind GeoIP (Optional)
-         */
         private static Map<String, String> getLocationFromIPMaxMind(String ip) {
             try {
                 File database = new File("C:\\Users\\mehdy\\Desktop\\projetPi\\Back\\src\\main\\java\\com\\example\\back\\GeoLite2-City.mmdb");
@@ -218,9 +171,7 @@
             }
         }
 
-        /**
-         * Retrieves an access token from Keycloak
-         */
+
         public static String getAccessToken() {
             return getInstance().tokenManager().grantToken().getToken();
         }

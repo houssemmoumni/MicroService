@@ -44,6 +44,6 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        return JwtDecoders.fromIssuerLocation("http://localhost:8080/realms/constructionRealm");
+        return JwtDecoders.fromIssuerLocation("http://localhost:8080/realms/myRealm");
     }
 }

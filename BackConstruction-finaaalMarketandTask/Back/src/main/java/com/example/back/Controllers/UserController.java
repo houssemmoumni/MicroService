@@ -48,12 +48,12 @@ public class UserController {
                     .body(new ApiResponse(false, "User already exists in the database", null));
         }
 
-        try (Response response = k.realm("constructionRealm").users().create(userRep)) {
+        try (Response response = k.realm("myRealm").users().create(userRep)) {
             if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(new ApiResponse(false, response.readEntity(String.class), null));
             } else {
-                UserRepresentation userRepresentation = k.realm("constructionRealm").users().search(userRep.getUsername()).get(0);
+                UserRepresentation userRepresentation = k.realm("myRealm").users().search(userRep.getUsername()).get(0);
                 userService.assignRoles(userRepresentation.getId(), userRep.getRealmRoles());
                 try {
                     User u = userService.addUser(userWrapper.getUser());
@@ -83,7 +83,7 @@ public class UserController {
     @GetMapping("/getProfilePicture/{userId}")
     public ResponseEntity<String> getProfilePicture(@PathVariable String userId) {
         try {
-            UserResource userResource = keycloak.realm("constructionRealm").users().get(userId);
+            UserResource userResource = keycloak.realm("myRealm").users().get(userId);
             UserRepresentation userRepresentation = userResource.toRepresentation();
             List<String> profilePictureList = userRepresentation.getAttributes().get("profile_picture");
             if (profilePictureList == null || profilePictureList.isEmpty()) {
@@ -109,7 +109,7 @@ public class UserController {
             String lastName = keycloakUser.getLastName();
 
             if (!userService.existsByLogin(login) && !userService.existsByLogin(email)) {
-                List<String> roles = keycloak.realm("constructionRealm")
+                List<String> roles = keycloak.realm("myRealm")
                         .users().get(keycloakUser.getId())
                         .roles().realmLevel().listAll()
                         .stream().map(RoleRepresentation::getName).collect(Collectors.toList());
@@ -150,12 +150,12 @@ public class UserController {
             return ResponseEntity.ok(new ApiResponse(true, "User found in database", userWrapper));
         }
 
-        List<UserRepresentation> keycloakUsers = k.realm("constructionRealm").users().search(username);
+        List<UserRepresentation> keycloakUsers = k.realm("myRealm").users().search(username);
         if (!keycloakUsers.isEmpty()) {
             UserRepresentation keycloakUser = keycloakUsers.get(0);
             String keycloakUserId = keycloakUser.getId();
 
-            List<RoleRepresentation> roles = k.realm("constructionRealm")
+            List<RoleRepresentation> roles = k.realm("myRealm")
                     .users().get(keycloakUserId).roles().realmLevel().listAll();
 
             String assignedRole = "user";
@@ -204,9 +204,9 @@ public class UserController {
     @DeleteMapping("/DeleteUser/{username}")
     public ResponseEntity<ApiResponse> deleteUser(@PathVariable String username){
         Keycloak k = KeycloakConfig.getInstance();
-        UserRepresentation userRepresentation = k.realm("constructionRealm").users().search(username).get(0);
+        UserRepresentation userRepresentation = k.realm("myRealm").users().search(username).get(0);
         try {
-            k.realm("constructionRealm").users().get(userRepresentation.getId()).remove();
+            k.realm("myRealm").users().get(userRepresentation.getId()).remove();
         } catch (Exception e) {
             log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.OK)
@@ -240,7 +240,7 @@ public class UserController {
     // Get user login history
     @GetMapping("/GetUserLoginHistory/{username}")
     public ResponseEntity<List<Map<String, Object>>> getUserLoginHistory(@PathVariable String username) {
-        String realm = "constructionRealm";
+        String realm = "myRealm";
         List<Map<String, Object>> loginHistory = KeycloakConfig.getUserLoginEvents(realm, username);
         return ResponseEntity.ok(loginHistory);
     }
@@ -300,7 +300,26 @@ public class UserController {
 
         return ResponseEntity.ok(usersList);
     }
+    @PreAuthorize("hasAuthority('chef_projet')")
+    @GetMapping("/GetOuvriers")
+    public ResponseEntity<List<User>> getOuvriers() {
+        List<User> ouvriers = userService.getUsersByRole("ouvrier");
+        return ResponseEntity.ok(ouvriers);
+    }
+    @PutMapping("/updateProfile")
+    public ResponseEntity<?> updateUserProfile(
+            @RequestParam String email,
+            @RequestParam String firstName,
+            @RequestParam String lastName,
+            @RequestParam int numTel) {
 
+        User updatedUser = userService.updateUserProfile(email, firstName, lastName, numTel);
+        if (updatedUser != null) {
+            return ResponseEntity.ok(updatedUser);  // Retourne l'utilisateur mis à jour
+        } else {
+            return ResponseEntity.status(404).body("User not found");  // Si l'utilisateur n'est pas trouvé
+        }
+    }
 
 
 }
